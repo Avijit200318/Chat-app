@@ -1,9 +1,17 @@
 import React from 'react'
+import {BrowserRouter, Routes, Route} from "react-router-dom"
+import Home from './components/pages/Home'
+import SignIn from './components/pages/SignIn'
+import SignUp from './components/pages/SignUp'
 
 export default function App() {
   return (
-    <div>
-      <h1 className="bg-red-200">Hello world</h1>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path='/' element={<Home />} />
+        <Route path='sign-in' element={<SignIn />} />
+        <Route path='sign-up' element={<SignUp/>} />
+      </Routes>
+    </BrowserRouter>
   )
 }
