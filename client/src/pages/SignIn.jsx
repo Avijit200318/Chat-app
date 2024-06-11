@@ -1,14 +1,14 @@
 import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom';
+import {useDispatch, useSelector} from "react-redux";
+import {signInStart, signInFailure, signInSuccess} from "../redux/user/userSlice";
 
-
-export default function SignUp() {
+export default function SignIn() {
 
   const [formData, setFormData] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  console.log(formData);
 
+  const dispatch = useDispatch();
+  const {loading, error} = useSelector((state) => state.user);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -18,9 +18,8 @@ export default function SignUp() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      setLoading(true);
-      setError(null);
-      const res = await fetch("/api/auth/signup", {
+      dispatch(signInStart());
+      const res = await fetch("/api/auth/signin", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -30,33 +29,30 @@ export default function SignUp() {
 
       const data = await res.json();
       if (data.success === false) {
-        setError(data.message);
+        dispatch(signInFailure(data.message));
+        setError(data);
         setLoading(false);
         return;
       }
-      setLoading(false);
-      setError(null);
-      navigate("/sign-in");
+      dispatch(signInSuccess(data));
+      navigate("/");
     } catch (error) {
-      setError(error.message);
-      setLoading(false);
+      dispatch(signInFailure(error))
     }
   };
-
   return (
     <div className='flex justify-center items-center h-[90vh] bg-[#C5FFF8]'>
       <div className="w-[28rem] p-4 rounded-3xl shadow-2xl bg-white">
-        <h1 className='text-center text-3xl my-7'>Sign Up</h1>
+        <h1 className='text-center text-3xl my-7'>Sign In</h1>
         <form onSubmit={handleSubmit} className="flex flex-col justify-center my-4 p-4 gap-4">
-          <input type="text" placeholder='Username' id='username' className='px-4 py-3 rounded-lg  border-2 border-gray-300' autoComplete='off' onChange={handleChange} />
           <input type="email" placeholder='email' id='email' className='px-4 py-3 rounded-lg  border-2 border-gray-300' autoComplete='off' onChange={handleChange} />
           <input type="password" placeholder='password' id='password' className='px-4 py-3 rounded-lg border-2 border-gray-300' autoComplete='off' onChange={handleChange} />
-          <button disabled={loading} className="bg-blue-600 text-xl text-white font-semibold w-full py-2 rounded-lg transition-all duration-300 hover:bg-blue-500 disabled:bg-blue-400">{loading ? 'Loading...' : 'Sign Up'}</button>
+          <button disabled={loading} className="bg-blue-600 text-xl text-white font-semibold w-full py-2 rounded-lg transition-all duration-300 hover:bg-blue-500 disabled:bg-blue-400">{loading ? 'Loading...' : 'Sign In'}</button>
         </form>
         <p className='px-6 text-xs font-semibold my-4'>By continuing, you agree to NovaMart's Terms of Service and acknowledge you've read our Privacy Policy.Notice all collection</p>
         <div className="flex gap-2 px-4 my-8">
-          <p>Already have an account ?</p>
-          <Link to='/sign-in' className='text-blue-500 font-semibold'>Login</Link>
+          <p>Don't have an account ?</p>
+          <Link to='/sign-in' className='text-blue-500 font-semibold'>Sign Up</Link>
         </div>
         {error && (
           <p className="text-red-600 text-sm font-semibold px-4 text-center">{error}</p>
