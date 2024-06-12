@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import OAuth from '../components/OAuth';
 
 
 export default function SignUp() {
@@ -51,6 +52,7 @@ export default function SignUp() {
           <input type="email" placeholder='email' id='email' className='px-4 py-3 rounded-lg  border-2 border-gray-300' autoComplete='off' onChange={handleChange} />
           <input type="password" placeholder='password' id='password' className='px-4 py-3 rounded-lg border-2 border-gray-300' autoComplete='off' onChange={handleChange} />
           <button disabled={loading} className="bg-blue-600 text-xl text-white font-semibold w-full py-2 rounded-lg transition-all duration-300 hover:bg-blue-500 disabled:bg-blue-400">{loading ? 'Loading...' : 'Sign Up'}</button>
+          <OAuth />
         </form>
         <p className='px-6 text-xs font-semibold my-4'>By continuing, you agree to NovaMart's Terms of Service and acknowledge you've read our Privacy Policy.Notice all collection</p>
         <div className="flex gap-2 px-4 my-8">
