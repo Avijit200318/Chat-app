@@ -17,4 +17,22 @@ export const sendMessage = async (req, res, next) => {
     }catch(error){
         next(error);
     }
+};
+
+export const showMessage = async (req, res, next) => {
+    try{
+        const reciverId = req.params.id;
+        const userId = req.user.id;
+        const validReciver = await userModel.findById(reciverId);
+        if(!validReciver) return next(errorHandle(404, "Reciver not found"));
+        const allMessages = await messageModel.find({
+            $or: [
+                {sender: userId, reciver: reciverId},
+                {sender: reciverId, reciver: userId},
+            ]
+        }).sort({ timestamp: 1 });
+        return res.status(200).json(allMessages);
+    }catch(error){
+        next(error);
+    }
 }

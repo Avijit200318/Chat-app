@@ -7,6 +7,8 @@ import { TfiAnnouncement } from "react-icons/tfi";
 import { IoIosSearch } from "react-icons/io";
 import { useSelector } from "react-redux";
 import PlaneLogo from "../../public/images/plane.png";
+import { CiPaperplane } from "react-icons/ci";
+
 
 export default function Home() {
 
@@ -14,6 +16,12 @@ export default function Home() {
   const [allUsers, setAllUsers] = useState(null);
   const [reciverId, setReciverId] = useState(null);
   const [reciverData, setReciverData] = useState(null);
+  const [allMessages, setAllMessages] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  // console.log(reciverId);
+  // console.log(allMessages);
+  console.log(message);
 
   useEffect(() => {
     const fetUsers = async () => {
@@ -36,6 +44,7 @@ export default function Home() {
     const fetchReciverData = async () => {
       try {
         if (reciverId) {
+          setLoading(true);
           const res = await fetch(`/api/user/showuser/${reciverId}`, {
             method: 'POST',
             headers: {
@@ -46,15 +55,58 @@ export default function Home() {
           const data = await res.json();
           if (data.success === false) {
             console.log("reciver not found: ", data.message);
+            setLoading(false);
           }
           setReciverData(data);
+          fetchAllMessages();
         }
       } catch (error) {
         console.log(error);
+        setLoading(false);
       }
     };
     fetchReciverData();
+
+    const fetchAllMessages = async () => {
+      try {
+        if (reciverId) {
+          const res = await fetch(`api/message/showmessage/${reciverId}`);
+          const data = await res.json();
+          if (data.success === false) {
+            console.log(data.message);
+            setLoading(false);
+          }
+          console.log("data: ", data);
+          setAllMessages(data);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.log(error);
+        setLoading(false);
+      }
+    };
   }, [reciverId]);
+
+  const handleMessageSend = async () => {
+    try{
+      const res = await fetch(`/api/message/send/${reciverId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({message})
+      });
+      const data = await res.json();
+      if(data.success === false){
+        console.log(data.message);
+      }
+      setMessage('');
+      console.log("message was send");
+    }catch(error){
+      console.log(error);
+    }
+  }
+
 
   return (
     <div className='flex'>
@@ -71,8 +123,8 @@ export default function Home() {
             <img src={currentUser.avatar} alt="" className="w-10 h-10 rounded-full bg-yellow-300 overflow-hidden" />
           </div>
         </div>
-        <div className="col2 w-[85%] h-screen bg-white px-2 py-4 flex flex-col">
-          <div className="border-b border-gray-400">
+        <div className="col2 w-[85%] h-screen bg-white py-4 flex flex-col">
+          <div className="border-b border-gray-400 px-2">
             <h1 className="text-2xl font-semibold px-4">Chats...</h1>
             <div className="border border-black flex my-4 overflow-hidden rounded-full bg-blue-50">
               <input type="text" placeholder='Search...' className="px-4 py-2 w-[85%] outline-none bg-transparent" />
@@ -81,7 +133,7 @@ export default function Home() {
           </div>
           {allUsers && (
             allUsers.map((user) =>
-              <div key={user.email} onClick={() => setReciverId(user._id)} className="flex items-center gap-6 py-2 border-b border-gray-500 transition-all duration-300 hover:bg-blue-50 cursor-pointer">
+              <div key={user.email} style={{background: `${user._id === reciverId? 'rgb(239, 246, 255)':''}`}} onClick={() => setReciverId(user._id)} className="flex items-center gap-6 py-2 border-b border-gray-500 transition-all duration-300 hover:bg-blue-50 cursor-pointer px-2">
                 <img src={user.avatar} alt="" className="w-10 h-10 rounded-full bg-blue-200" />
                 <div className="flex flex-col gap-2">
                   <h1 className="text-lg">{user.username}</h1>
@@ -92,21 +144,28 @@ export default function Home() {
           )}
         </div>
       </div>
-      <div className="right w-[70%] h-screen border-l-4 border-gray-300">
+      <div className="right w-[70%] h-screen border-l-4 border-gray-300 relative">
         {!reciverData && (
           <div className="w-full h-screen flex justify-center items-center gap-4">
             <h1 className="text-[3rem] text-gray-500">ChatPlus...</h1>
             <img src={PlaneLogo} alt="" className="w-48 h-48 opacity-50" />
           </div>
         )}
+        {loading && (
+          <div className="w-full h-full top-0 left-0 absolute flex justify-center items-center bg-[#0197ff]">
+            <div className="border-8 border-t-8 border-t-white border-gray-300 rounded-full h-16 w-16 animate-spin"></div>
+          </div>
+        )}
         {reciverData && (
           <div>
-            <div className="header bg-blue-50 flex items-center gap-4 px-4 py-2">
+            <div className="header bg-blue-50 flex items-center h-[9vh] gap-4 px-4 py-2">
               <img src={reciverData.avatar} alt="" className="h-12 w-12 rounded-full overflow-hidden bg-yellow-300" />
               <h1 className="text-lg">{reciverData.username}</h1>
             </div>
-            <div className="chatBox"></div>
-            <div className="footer">
+            <div className="chatBox w-full h-[82vh]"></div>
+            <div className="footer bg-blue-50 h-[9vh] px-4 py-2 flex items-center border">
+              <input type="text" onChange={(e) => setMessage(e.target.value)} placeholder='Type a new message' className="w-[90%] px-4 py-3 rounded-md outline-none" value={message} />
+              <button disabled={message === ''} onClick={handleMessageSend} className="px-4 py-1 bg-blue-400 text-white rounded-md disabled:bg-blue-300 "><CiPaperplane className='text-4xl' /></button>
             </div>
           </div>
         )}
