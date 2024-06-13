@@ -8,4 +8,15 @@ export const allUsers = async (req, res, next) => {
     }catch(error){
         next(error);
     }
+};
+
+export const userData = async (req, res, next) => {
+    try{
+        const userId = req.params.id;
+        const user = await userModel.findById(userId).select('-password');
+        if(!user) return next(errorHandle(404, "User not found"));
+        return res.status(200).json(user);
+    }catch(error){
+        next(error);
+    }
 }
