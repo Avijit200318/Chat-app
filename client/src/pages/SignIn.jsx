@@ -54,7 +54,7 @@ export default function SignIn() {
         <p className='px-6 text-xs font-semibold my-4'>By continuing, you agree to NovaMart's Terms of Service and acknowledge you've read our Privacy Policy.Notice all collection</p>
         <div className="flex gap-2 px-4 my-8">
           <p>Don't have an account ?</p>
-          <Link to='/sign-in' className='text-blue-500 font-semibold'>Sign Up</Link>
+          <Link to='/sign-up' className='text-blue-500 font-semibold'>Sign Up</Link>
         </div>
         {error && (
           <p className="text-red-600 text-sm font-semibold px-4 text-center">{error}</p>
