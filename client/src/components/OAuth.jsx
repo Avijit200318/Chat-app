@@ -30,19 +30,17 @@ export default function OAuth() {
                 }),
             });
             const data = await res.json();
-            if(data.success === false){
-                console.log(data.message);
-                return;
+            if(data.success !== false){
+                dispatch(signInSuccess(data));
+                navigate('/');
             }
-            dispatch(signInSuccess(data));
-            navigate('/');
         } catch (error) {
             console.log("cannot sign with google ", error);
         }
     };
 
     return (
-        <button type='button' onClickCapture={handleGoogleClick} className='border sm:border-2 border-black flex justify-center items-center gap-4 p-[0.3rem] rounded-lg overflow-hidden transition-all duration-300 hover:rounded-full'>
+        <button type='button' onClickCapture={handleGoogleClick} className='border sm:border-2 border-black flex justify-center items-center gap-4 p-[0.3rem] overflow-hidden rounded-full'>
             <img src={googleLogo} alt="" className="w-8" />
             <h3 className='text-xl font-semibold'>Google</h3>
         </button>
