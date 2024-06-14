@@ -8,6 +8,7 @@ import { IoIosSearch } from "react-icons/io";
 import { useSelector } from "react-redux";
 import PlaneLogo from "../../public/images/plane.png";
 import { CiPaperplane } from "react-icons/ci";
+import Message from '../components/Message';
 
 
 export default function Home() {
@@ -162,7 +163,13 @@ export default function Home() {
               <img src={reciverData.avatar} alt="" className="h-12 w-12 rounded-full overflow-hidden bg-yellow-300" />
               <h1 className="text-lg">{reciverData.username}</h1>
             </div>
-            <div className="chatBox w-full h-[82vh]"></div>
+            <div className="chatBox w-full h-[82vh] overflow-y-auto">
+              {allMessages.length > 0 && (
+                allMessages.map((msg) => 
+                  <Message key={msg._id} text={msg.text} sender={msg.sender} createTime={msg.createdAt} />
+                )
+              )}
+            </div>
             <div className="footer bg-blue-50 h-[9vh] px-4 py-2 flex items-center border">
               <input type="text" onChange={(e) => setMessage(e.target.value)} placeholder='Type a new message' className="w-[90%] px-4 py-3 rounded-md outline-none" value={message} />
               <button disabled={message === ''} onClick={handleMessageSend} className="px-4 py-1 bg-blue-400 text-white rounded-md disabled:bg-blue-300 "><CiPaperplane className='text-4xl' /></button>
