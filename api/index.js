@@ -1,11 +1,14 @@
 import express from "express";
-import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import userRouter from "./routes/user.route.js";
 import authRouter from "./routes/auth.route.js";
 import messageRouter from "./routes/message.route.js";
+
+import http from "http";
+import cors from "cors";
+import {Server} from "socket.io";
 
 dotenv.config();
 
@@ -19,13 +22,42 @@ const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors());
 
-app.use(cors({
-    origin: "http://localhost:5173/",
-    credentials: true
-}))
+const users = [{}];
 
-app.listen(3000, () => {
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
+
+io.on("connection", (socket) => {
+    console.log("connected to socket io");
+
+    socket.on('joined', ({user}) => {
+        users[user._id] = socket.id;
+        console.log(`chat is now connected to ${user.username} and ${socket.id}`);
+        socket.join(user._id);
+    });
+    
+    socket.on('message', ({data}) => {
+        // console.log("data: ", data);
+        const reciverId = users[data.reciver];
+        // console.log("message socketId: ", reciverId);
+        if(reciverId){
+            io.to(reciverId).emit('sendMessage', {textMsg: data})
+        }
+        const senderId = users[data.sender];
+        if (senderId) {
+            io.to(senderId).emit('sendMessage', { textMsg: data });
+        }
+    });
+})
+
+server.listen(3000, () => {
     console.log("Server is running at port 3000");
 })
 
