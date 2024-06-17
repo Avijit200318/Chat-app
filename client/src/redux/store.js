@@ -1,10 +1,11 @@
 import {combineReducers ,configureStore } from '@reduxjs/toolkit'
 import userReducer from "./user/userSlice";
+import messageReducer from "./message/messageSlice";
 import {persistStore, persistReducer} from "redux-persist";
 import sessionStorage from 'redux-persist/lib/storage/session';
 
 
-const rootReducer = combineReducers({user: userReducer});
+const rootReducer = combineReducers({user: userReducer, message: messageReducer});
 
 const persistConfig = {
     key: 'root',

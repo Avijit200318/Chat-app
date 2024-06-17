@@ -8,11 +8,11 @@ import messageRouter from "./routes/message.route.js";
 
 import http from "http";
 import cors from "cors";
-import {Server} from "socket.io";
+import { Server } from "socket.io";
 
 dotenv.config();
 
-mongoose.connect(process.env.MONGO).then(()=> {
+mongoose.connect(process.env.MONGO).then(() => {
     console.log("mongodb is connected");
 }).catch((error) => {
     console.log(error);
@@ -37,22 +37,43 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
     console.log("connected to socket io");
 
-    socket.on('joined', ({user}) => {
+    socket.on('joined', ({ user }) => {
         users[user._id] = socket.id;
         console.log(`chat is now connected to ${user.username} and ${socket.id}`);
         socket.join(user._id);
     });
-    
-    socket.on('message', ({data}) => {
-        // console.log("data: ", data);
-        const reciverId = users[data.reciver];
-        // console.log("message socketId: ", reciverId);
-        if(reciverId){
-            io.to(reciverId).emit('sendMessage', {textMsg: data})
+
+    socket.on("join chat", ({ room }) => {
+        if (!room._id) {
+            console.log("room is undefined");
+        } else {
+            socket.join(room._id);
+            console.log("User Joined Room: " + room._id);
         }
-        const senderId = users[data.sender];
-        if (senderId) {
-            io.to(senderId).emit('sendMessage', { textMsg: data });
+    });
+
+    socket.on('message', ({ data, room }) => {
+        // console.log("data: ", data);
+        // const reciverId = room.users[0];
+        // // console.log("message socketId: ", reciverId);
+        // if(reciverId){
+        //     io.to(reciverId).emit('sendMessage', {textMsg: data})
+        // }
+        // const senderId = room.users[1];
+        // if (senderId) {
+        //     io.to(senderId).emit('sendMessage', { textMsg: data });
+        // }
+        if ((data.reciver === room.users[0] || data.reciver === room.users[1]) && (data.sender === room.users[0] || data.sender === room.users[1])) {
+            io.to(room._id).emit('sendMessage', { textMsg: data });
+        }
+    });
+
+    socket.on('disconnect', () => {
+        for (let userId in users) {
+            if (users[userId] === socket.id) {
+                delete users[userId];
+                break;
+            }
         }
     });
 })

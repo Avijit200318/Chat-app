@@ -9,6 +9,8 @@ import { useSelector } from "react-redux";
 import PlaneLogo from "../../public/images/plane.png";
 import { CiPaperplane } from "react-icons/ci";
 import Message from '../components/Message';
+import { messageFailure, messageSuccess } from '../redux/message/messageSlice';
+import { useDispatch } from 'react-redux';
 
 import { io } from "socket.io-client";
 
@@ -18,18 +20,18 @@ let socket;
 export default function Home() {
 
   const { currentUser } = useSelector((state) => state.user);
+  const {currentMessage} = useSelector((state) => state.message);
+  console.log("currentMessage recId: ", currentMessage);
   const [allUsers, setAllUsers] = useState(null);
   const [reciverId, setReciverId] = useState(null);
   const [reciverData, setReciverData] = useState(null);
   const [allMessages, setAllMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  // console.log(reciverId);
   // console.log(allMessages);
-  console.log(message);
-  const [socketConnected, setSocketConnected] = useState(false);
+  const [room, setRoom] = useState(null);
   const divRef = useRef(null);
-
+  const dispatch = useDispatch();
 
   useEffect(() => {
     socket = io(ENDPOINT, { transports: ['websocket'] });
@@ -37,10 +39,15 @@ export default function Home() {
     socket.on("connection", () => {
       console.log("connected to socket");
     });
+
+    socket.emit('joined', { user: currentUser });
   }, [])
 
   useEffect(() => {
     socket.on('sendMessage', ({ textMsg }) => {
+      console.log("msg id: ", textMsg);
+      console.log("reciverId: ", reciverId);
+      if(textMsg.sender.toString() === currentMessage.rediverRedux)
         setAllMessages([...allMessages, textMsg]);
     })
 
@@ -71,7 +78,7 @@ export default function Home() {
       try {
         if (reciverId) {
           setLoading(true);
-          const res = await fetch(`/api/user/showuser/${reciverId}`, {
+          const res = await fetch(`/api/user/showuser/${currentMessage.rediverRedux}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -84,7 +91,7 @@ export default function Home() {
             setLoading(false);
           }
           setReciverData(data);
-          socket.emit('joined', { user: data });
+          // socket.emit('joined', { user: data });
           fetchAllMessages();
         }
       } catch (error) {
@@ -97,14 +104,14 @@ export default function Home() {
     const fetchAllMessages = async () => {
       try {
         if (reciverId) {
-          const res = await fetch(`api/message/showmessage/${reciverId}`);
+          const res = await fetch(`api/message/showmessage/${currentMessage.rediverRedux}`);
           const data = await res.json();
           if (data.success === false) {
             console.log(data.message);
             setLoading(false);
           }
-          console.log("data: ", data);
           setAllMessages(data);
+          fetchRoom();
           setLoading(false);
         }
       } catch (error) {
@@ -112,11 +119,25 @@ export default function Home() {
         setLoading(false);
       }
     };
+
+    const fetchRoom = async () => {
+      try{
+        const res = await fetch(`/api/message/getChat/${currentMessage.rediverRedux}`);
+        const data = await res.json();
+        if(data.success === false){
+          console.log(data.message);
+        }
+        setRoom(data);
+        socket.emit('join chat', {room: data});
+      }catch(error){
+        console.log(error);
+      }
+    }
   }, [reciverId]);
 
   const handleMessageSend = async () => {
     try {
-      const res = await fetch(`/api/message/send/${reciverId}`, {
+      const res = await fetch(`/api/message/send/${currentMessage.rediverRedux}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -127,7 +148,8 @@ export default function Home() {
       if (data.success === false) {
         console.log(data.message);
       }
-      socket.emit('message', { data: data });
+      socket.emit('message', { data: data, room: room });
+      setAllMessages([...allMessages, data]);
       setMessage('');
       console.log("message was send");
     } catch (error) {
@@ -135,6 +157,10 @@ export default function Home() {
     }
   }
 
+  const handleSetReciverid = (recId) => {
+    setReciverId(recId);
+    dispatch(messageSuccess({rediverRedux: recId}));
+  }
 
   return (
     <div className='flex'>
@@ -161,8 +187,8 @@ export default function Home() {
             </div>
           </div>
           {allUsers && (
-            allUsers.map((user) =>
-              <div key={user.email} style={{ background: `${user._id === reciverId ? 'rgb(239, 246, 255)' : ''}` }} onClick={() => setReciverId(user._id)} className="flex items-center gap-6 py-2 border-b border-gray-500 transition-all duration-300 hover:bg-blue-50 cursor-pointer px-2">
+            allUsers.map((user, index) =>
+              <div key={index} style={{ background: `${user._id === reciverId ? 'rgb(239, 246, 255)' : ''}` }} onClick={()=> handleSetReciverid(user._id)} className="flex items-center gap-6 py-2 border-b border-gray-500 transition-all duration-300 hover:bg-blue-50 cursor-pointer px-2">
                 <img src={user.avatar} alt="" className="w-10 h-10 rounded-full bg-blue-200" />
                 <div className="flex flex-col gap-2">
                   <h1 className="text-lg">{user.username}</h1>
