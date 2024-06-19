@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useRef, useMemo } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { IoChatboxEllipsesOutline } from "react-icons/io5";
-import { MdGroup } from "react-icons/md";
+import { MdGroup, MdOutlineAttachFile } from "react-icons/md";
 import { BsTools } from "react-icons/bs";
 import { IoSettingsOutline } from "react-icons/io5";
 import { TfiAnnouncement } from "react-icons/tfi";
@@ -9,8 +9,10 @@ import { useSelector } from "react-redux";
 import PlaneLogo from "../../public/images/plane.png";
 import { CiPaperplane } from "react-icons/ci";
 import Message from '../components/Message';
-import { messageFailure, messageSuccess } from '../redux/message/messageSlice';
+import { messageSuccess } from '../redux/message/messageSlice';
 import { useDispatch } from 'react-redux';
+import {getStorage, getDownloadURL, ref, uploadBytesResumable} from "firebase/storage";
+import {app} from "../firebase";
 
 import { io } from "socket.io-client";
 
@@ -41,6 +43,13 @@ export default function Home() {
   const [socket, setSocket] = useState(null);
   const [typing, setTyping] = useState(false);
   const [typingTimeOut, setTypingTimeOut] = useState(null);
+
+  const fileRef = useRef(null);
+  const [file, setFile] = useState(null);
+  const [fileUrl, setFileUrl] = useState('');
+  const [fileUploadError, setFileUploadError] = useState(null);
+  const [fileUploadPercent, setFileUploadPercent] = useState(0);
+  console.log("fileUrl: ", fileUrl);
 
   useEffect(() => {
     setSocket(io(ENDPOINT));
@@ -164,7 +173,12 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message, userId: currentUser._id })
+        body: JSON.stringify({
+          message,
+          userId: currentUser._id,
+          file: fileUrl? true : false,
+          image: fileUrl
+        })
       });
       const data = await res.json();
       if (data.success === false) {
@@ -173,6 +187,8 @@ export default function Home() {
       socket.emit('send-message', { message: data, roomId: room._id });
       setAllMessages((prev) => [...prev, data]);
       setMessage('');
+      setFileUrl('');
+      setFile(null);
       console.log("message was send");
     } catch (error) {
       console.log(error);
@@ -196,6 +212,35 @@ export default function Home() {
     setTypingTimeOut(setTimeout(() => {
       socket.emit('typing-stoped', { roomId: room._id });
     }, 1000));
+  };
+
+  useEffect(() => {
+    if(file){
+      handleFileUpload(file);
+    }
+  }, [file]);
+
+  const handleFileUpload = async (file) => {
+    const storage = getStorage(app);
+    const fileName = new Date().getTime() + file.name;
+    const storageRef = ref(storage, fileName);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    uploadTask.on('state_changed', 
+      (snapshot) => {
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log(`file percent: ${progress}%`);
+        setFileUploadPercent(progress);
+      },
+      (error) => {
+        setFileUploadError(true);
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          setFileUrl(downloadURL);
+        })
+      }
+    )
   }
 
   return (
@@ -262,13 +307,19 @@ export default function Home() {
             <div ref={divRef} className="chatBox w-full h-[82vh] overflow-y-auto">
               {allMessages.length > 0 && (
                 allMessages.map((msg) =>
-                  <Message key={msg._id} text={msg.text} sender={msg.sender} createTime={msg.createdAt} />
+                  <Message key={msg._id} text={msg.text} sender={msg.sender} createTime={msg.createdAt} file={msg.file} image={msg.image} />
                 )
               )}
             </div>
-            <div className="footer bg-blue-50 h-[9vh] px-4 py-2 flex items-center border">
-              <input type="text" onChange={handleInputMessage} placeholder='Type a new message' className="w-[90%] px-4 py-3 rounded-md outline-none" value={message} />
-              <button disabled={message === ''} onClick={handleMessageSend} className="px-4 py-1 bg-blue-400 text-white rounded-md disabled:bg-blue-300 "><CiPaperplane className='text-4xl' /></button>
+            <div className="footer bg-blue-50 h-[9vh] px-4 py-2 flex items-center gap-2 border">
+              <div className="w-[90%] flex items-center gap-2">
+                <input type="text" onChange={handleInputMessage} placeholder='Type a new message' className="w-[93%] px-4 py-3 rounded-md outline-none" value={message} />
+                <input ref={fileRef} type="file" onChange={(e) => setFile(e.target.files[0])} hidden accept='image/*' />
+                <button onClick={() => fileRef.current.click()} className="p-5 flex justify-center items-center rounded-full transition-all duration-300 hover:bg-gray-300">
+                  <MdOutlineAttachFile className='absolute text-2xl' />
+                </button>
+              </div>
+              <button disabled={message === '' && fileUploadPercent !==100 &&fileUploadError} onClick={handleMessageSend} className="px-4 py-1 bg-blue-400 text-white rounded-md disabled:bg-blue-300 "><CiPaperplane className='text-4xl' /></button>
             </div>
           </div>
         )}

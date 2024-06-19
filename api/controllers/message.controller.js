@@ -20,6 +20,8 @@ export const sendMessage = async (req, res, next) => {
             sender: userId,
             reciver: reciverId,
             text: req.body.message,
+            file: req.body.file,
+            image: req.body.image,
         });
         return res.status(201).json(newMessage);
     }catch(error){
