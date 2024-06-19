@@ -6,7 +6,7 @@ import chatModel from "../models/chat.model.js";
 export const sendMessage = async (req, res, next) => {
     try{
         const reciverId = req.params.id;
-        const userId = req.user.id;
+        const userId = req.body.userId;
         const validUser = await userModel.findById(reciverId);
         if(!validUser) return next(errorHandle(404, "reciver not found"));
 

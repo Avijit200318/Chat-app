@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useMemo } from 'react'
 import { IoChatboxEllipsesOutline } from "react-icons/io5";
 import { MdGroup } from "react-icons/md";
 import { BsTools } from "react-icons/bs";
@@ -20,10 +20,16 @@ let socket;
 export default function Home() {
 
   const { currentUser } = useSelector((state) => state.user);
-  const {currentMessage} = useSelector((state) => state.message);
-  console.log("currentMessage recId: ", currentMessage);
+  const { currentMessage } = useSelector((state) => state.message);
+  // console.log("currentMessage recId: ", currentMessage);
   const [allUsers, setAllUsers] = useState(null);
-  const [reciverId, setReciverId] = useState(null);
+  const [reciverId, setReciverId] = useState(() => {
+    if (currentMessage) {
+      return currentMessage.rediverRedux;
+    } else {
+      return null;
+    }
+  });
   const [reciverData, setReciverData] = useState(null);
   const [allMessages, setAllMessages] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -32,25 +38,42 @@ export default function Home() {
   const [room, setRoom] = useState(null);
   const divRef = useRef(null);
   const dispatch = useDispatch();
+  const [socket, setSocket] = useState(null);
+  const [typing, setTyping] = useState(false);
+  const [typingTimeOut, setTypingTimeOut] = useState(null);
 
   useEffect(() => {
-    socket = io(ENDPOINT, { transports: ['websocket'] });
+    setSocket(io(ENDPOINT));
 
-    socket.on("connection", () => {
-      console.log("connected to socket");
-    });
-
-    socket.emit('joined', { user: currentUser });
-  }, [])
+  }, []);
 
   useEffect(() => {
-    socket.on('sendMessage', ({ textMsg }) => {
-      console.log("msg id: ", textMsg);
-      console.log("reciverId: ", reciverId);
-      if(textMsg.sender.toString() === currentMessage.rediverRedux)
-        setAllMessages([...allMessages, textMsg]);
-    })
+    if (socket && room) {
+      socket.emit('join-room', { roomId: room._id });
+    } else {
+      console.log("socket is not ready or room is not ready");
+    }
+  }, [socket, room]);
 
+  useEffect(() => {
+    if (socket) {
+      socket.on('message-from-server', (data) => {
+        setAllMessages((prev) => [...prev, data.message]);
+      })
+
+      socket.on('typing-started-from-server', () => {
+        setTyping(true);
+      })
+
+      socket.on('typing-stoped-from-server', () => {
+        setTyping(false);
+      })
+
+    }
+  }, [socket]);
+
+
+  useEffect(() => {
     if (divRef.current) {
       divRef.current.scrollTop = divRef.current.scrollHeight;
     }
@@ -91,7 +114,6 @@ export default function Home() {
             setLoading(false);
           }
           setReciverData(data);
-          // socket.emit('joined', { user: data });
           fetchAllMessages();
         }
       } catch (error) {
@@ -104,6 +126,7 @@ export default function Home() {
     const fetchAllMessages = async () => {
       try {
         if (reciverId) {
+          if (reciverId === currentUser._id) console.log("some problem in reciverId");
           const res = await fetch(`api/message/showmessage/${currentMessage.rediverRedux}`);
           const data = await res.json();
           if (data.success === false) {
@@ -121,15 +144,14 @@ export default function Home() {
     };
 
     const fetchRoom = async () => {
-      try{
+      try {
         const res = await fetch(`/api/message/getChat/${currentMessage.rediverRedux}`);
         const data = await res.json();
-        if(data.success === false){
+        if (data.success === false) {
           console.log(data.message);
         }
         setRoom(data);
-        socket.emit('join chat', {room: data});
-      }catch(error){
+      } catch (error) {
         console.log(error);
       }
     }
@@ -142,14 +164,14 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message })
+        body: JSON.stringify({ message, userId: currentUser._id })
       });
       const data = await res.json();
       if (data.success === false) {
         console.log(data.message);
       }
-      socket.emit('message', { data: data, room: room });
-      setAllMessages([...allMessages, data]);
+      socket.emit('send-message', { message: data, roomId: room._id });
+      setAllMessages((prev) => [...prev, data]);
       setMessage('');
       console.log("message was send");
     } catch (error) {
@@ -158,8 +180,22 @@ export default function Home() {
   }
 
   const handleSetReciverid = (recId) => {
-    setReciverId(recId);
-    dispatch(messageSuccess({rediverRedux: recId}));
+    if (recId) {
+      setReciverId(recId);
+      dispatch(messageSuccess({ rediverRedux: recId }));
+      socket.emit('leave-room', { roomId: room._id });
+    }
+  };
+
+  const handleInputMessage = (e) => {
+    setMessage(e.target.value);
+    socket.emit('typing-started', { roomId: room._id });
+
+    if (typingTimeOut) clearTimeout(typingTimeOut);
+
+    setTypingTimeOut(setTimeout(() => {
+      socket.emit('typing-stoped', { roomId: room._id });
+    }, 1000));
   }
 
   return (
@@ -180,7 +216,8 @@ export default function Home() {
         <div className="col2 w-[85%] h-screen bg-white py-4 flex flex-col">
           <div className="border-b border-gray-400 px-2">
             <h1 className="text-2xl font-semibold px-4">Chats...</h1>
-            <p className="">{currentUser.username}</p>
+            {room && <p className="">room: {room._id}</p>}
+
             <div className="border border-black flex my-4 overflow-hidden rounded-full bg-blue-50">
               <input type="text" placeholder='Search...' className="px-4 py-2 w-[85%] outline-none bg-transparent" />
               <button className='py-2 px-4 text-2xl w-[15%]'><IoIosSearch /></button>
@@ -188,7 +225,7 @@ export default function Home() {
           </div>
           {allUsers && (
             allUsers.map((user, index) =>
-              <div key={index} style={{ background: `${user._id === reciverId ? 'rgb(239, 246, 255)' : ''}` }} onClick={()=> handleSetReciverid(user._id)} className="flex items-center gap-6 py-2 border-b border-gray-500 transition-all duration-300 hover:bg-blue-50 cursor-pointer px-2">
+              <div key={index} style={{ background: `${user._id === reciverId ? 'rgb(239, 246, 255)' : ''}` }} onClick={() => handleSetReciverid(user._id)} className="flex items-center gap-6 py-2 border-b border-gray-500 transition-all duration-300 hover:bg-blue-50 cursor-pointer px-2">
                 <img src={user.avatar} alt="" className="w-10 h-10 rounded-full bg-blue-200" />
                 <div className="flex flex-col gap-2">
                   <h1 className="text-lg">{user.username}</h1>
@@ -213,9 +250,14 @@ export default function Home() {
         )}
         {reciverData && (
           <div>
-            <div className="header bg-blue-50 flex items-center h-[9vh] gap-4 px-4 py-2">
-              <img src={reciverData.avatar} alt="" className="h-12 w-12 rounded-full overflow-hidden bg-yellow-300" />
-              <h1 className="text-lg">{reciverData.username}</h1>
+            <div className="header bg-blue-50 h-[9vh] px-4 py-2">
+              <div className="flex items-center gap-4">
+                <img src={reciverData.avatar} alt="" className="h-12 w-12 rounded-full overflow-hidden bg-yellow-300" />
+                <div className="">
+                  <h1 className="text-lg">{reciverData.username}</h1>
+                  {typing && <p className='text-xs font-semibold text-gray-600 pl-1'>Typing...</p>}
+                </div>
+              </div>
             </div>
             <div ref={divRef} className="chatBox w-full h-[82vh] overflow-y-auto">
               {allMessages.length > 0 && (
@@ -225,7 +267,7 @@ export default function Home() {
               )}
             </div>
             <div className="footer bg-blue-50 h-[9vh] px-4 py-2 flex items-center border">
-              <input type="text" onChange={(e) => setMessage(e.target.value)} placeholder='Type a new message' className="w-[90%] px-4 py-3 rounded-md outline-none" value={message} />
+              <input type="text" onChange={handleInputMessage} placeholder='Type a new message' className="w-[90%] px-4 py-3 rounded-md outline-none" value={message} />
               <button disabled={message === ''} onClick={handleMessageSend} className="px-4 py-1 bg-blue-400 text-white rounded-md disabled:bg-blue-300 "><CiPaperplane className='text-4xl' /></button>
             </div>
           </div>

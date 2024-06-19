@@ -6,7 +6,7 @@ import userRouter from "./routes/user.route.js";
 import authRouter from "./routes/auth.route.js";
 import messageRouter from "./routes/message.route.js";
 
-import http from "http";
+import http, { createServer } from "http";
 import cors from "cors";
 import { Server } from "socket.io";
 
@@ -26,55 +26,51 @@ app.use(cors());
 
 const users = [{}];
 
-const server = http.createServer(app);
+const server = createServer(app);
 const io = new Server(server, {
     cors: {
         origin: "*",
-        methods: ["GET", "POST"]
-    }
+        methods: ['GET', 'POST'],
+        credentials: true,
+    },
+    pingTimeout: 60000,
 });
+
 
 io.on("connection", (socket) => {
     console.log("connected to socket io");
 
-    socket.on('joined', ({ user }) => {
-        users[user._id] = socket.id;
-        console.log(`chat is now connected to ${user.username} and ${socket.id}`);
-        socket.join(user._id);
+    socket.on('join-room', ({roomId}) => {
+        socket.join(roomId);
+        console.log("joining room: ", roomId);
+    })
+
+    socket.on('leave-room', ({roomId}) => {
+        socket.leave(roomId);
+        console.log("leave room: ", roomId);
     });
 
-    socket.on("join chat", ({ room }) => {
-        if (!room._id) {
-            console.log("room is undefined");
-        } else {
-            socket.join(room._id);
-            console.log("User Joined Room: " + room._id);
-        }
-    });
+    socket.on('send-message', ({message, roomId}) => {
+        let skt = socket.broadcast;
+        skt = roomId ? skt.to(roomId) : skt;
+        console.log(roomId);
+        skt.emit('message-from-server', {message});
+    })
 
-    socket.on('message', ({ data, room }) => {
-        // console.log("data: ", data);
-        // const reciverId = room.users[0];
-        // // console.log("message socketId: ", reciverId);
-        // if(reciverId){
-        //     io.to(reciverId).emit('sendMessage', {textMsg: data})
-        // }
-        // const senderId = room.users[1];
-        // if (senderId) {
-        //     io.to(senderId).emit('sendMessage', { textMsg: data });
-        // }
-        if ((data.reciver === room.users[0] || data.reciver === room.users[1]) && (data.sender === room.users[0] || data.sender === room.users[1])) {
-            io.to(room._id).emit('sendMessage', { textMsg: data });
-        }
-    });
+    socket.on('typing-started', ({roomId}) => {
+        let skt = socket.broadcast;
+        skt = roomId ? skt.to(roomId) : skt;
+        skt.emit('typing-started-from-server')
+    })
+
+    socket.on('typing-stoped', ({roomId}) => {
+        let skt = socket.broadcast;
+        skt = roomId ? skt.to(roomId) : skt;
+        skt.emit('typing-stoped-from-server');
+    })
 
     socket.on('disconnect', () => {
-        for (let userId in users) {
-            if (users[userId] === socket.id) {
-                delete users[userId];
-                break;
-            }
-        }
+        console.log("user left ");
     });
 })
 
