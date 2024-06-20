@@ -11,8 +11,8 @@ import { CiPaperplane } from "react-icons/ci";
 import Message from '../components/Message';
 import { messageSuccess } from '../redux/message/messageSlice';
 import { useDispatch } from 'react-redux';
-import {getStorage, getDownloadURL, ref, uploadBytesResumable} from "firebase/storage";
-import {app} from "../firebase";
+import { getStorage, getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { app } from "../firebase";
 
 import { io } from "socket.io-client";
 
@@ -50,6 +50,7 @@ export default function Home() {
   const [fileUploadError, setFileUploadError] = useState(null);
   const [fileUploadPercent, setFileUploadPercent] = useState(0);
   console.log("fileUrl: ", fileUrl);
+  const [searchText, setSearchText] = useState('');
 
   useEffect(() => {
     setSocket(io(ENDPOINT));
@@ -176,7 +177,7 @@ export default function Home() {
         body: JSON.stringify({
           message,
           userId: currentUser._id,
-          file: fileUrl? true : false,
+          file: fileUrl ? true : false,
           image: fileUrl
         })
       });
@@ -215,7 +216,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    if(file){
+    if (file) {
       handleFileUpload(file);
     }
   }, [file]);
@@ -226,7 +227,7 @@ export default function Home() {
     const storageRef = ref(storage, fileName);
     const uploadTask = uploadBytesResumable(storageRef, file);
 
-    uploadTask.on('state_changed', 
+    uploadTask.on('state_changed',
       (snapshot) => {
         const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         console.log(`file percent: ${progress}%`);
@@ -241,6 +242,28 @@ export default function Home() {
         })
       }
     )
+  };
+
+  const handleSearchUser = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch("/api/user/search", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ searchText }),
+      });
+
+      const data = await res.json();
+      if (data.success === false) {
+        console.log(data.message);
+      }
+      setSearchText('');
+      setAllUsers(data);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   return (
@@ -261,22 +284,25 @@ export default function Home() {
         <div className="col2 w-[85%] h-screen bg-white py-4 flex flex-col">
           <div className="border-b border-gray-400 px-2">
             <h1 className="text-2xl font-semibold px-4">Chats...</h1>
-            {room && <p className="">room: {room._id}</p>}
+            {room && <p className="text-xs sm:px-4 sm:text-sm">room: {room._id}</p>}
 
-            <div className="border border-black flex my-4 overflow-hidden rounded-full bg-blue-50">
-              <input type="text" placeholder='Search...' className="px-4 py-2 w-[85%] outline-none bg-transparent" />
+            <form onSubmit={handleSearchUser} className="border border-black flex my-4 overflow-hidden rounded-full bg-blue-50">
+              <input type="text" onChange={(e) => setSearchText(e.target.value)} value={searchText} placeholder='Search using username or email' className="px-4 py-2 w-[85%] outline-none bg-transparent placeholder:truncate" />
               <button className='py-2 px-4 text-2xl w-[15%]'><IoIosSearch /></button>
-            </div>
+            </form>
           </div>
           {allUsers && (
-            allUsers.map((user, index) =>
-              <div key={index} style={{ background: `${user._id === reciverId ? 'rgb(239, 246, 255)' : ''}` }} onClick={() => handleSetReciverid(user._id)} className="flex items-center gap-6 py-2 border-b border-gray-500 transition-all duration-300 hover:bg-blue-50 cursor-pointer px-2">
-                <img src={user.avatar} alt="" className="w-10 h-10 rounded-full bg-blue-200" />
-                <div className="flex flex-col gap-2">
-                  <h1 className="text-lg">{user.username}</h1>
-                  <p className="text-xs text-gray-500 font-semibold">{user.status}</p>
+            allUsers.map((user, index) =>(
+              (user._id !== currentUser._id) && (
+                <div key={index} style={{ background: `${user._id === reciverId ? 'rgb(239, 246, 255)' : ''}` }} onClick={() => handleSetReciverid(user._id)} className="flex items-center gap-6 py-2 border-b border-gray-500 transition-all duration-300 hover:bg-blue-50 cursor-pointer px-2">
+                  <img src={user.avatar} alt="" className="w-10 h-10 rounded-full bg-blue-200" />
+                  <div className="flex flex-col gap-2">
+                    <h1 className="text-lg truncate">{user.username}</h1>
+                    <p className="text-xs text-gray-500 font-semibold">{user.status}</p>
+                  </div>
                 </div>
-              </div>
+              )
+            )
             )
           )}
         </div>
@@ -307,11 +333,11 @@ export default function Home() {
             <div ref={divRef} className="chatBox w-full h-[82vh] overflow-y-auto">
               {allMessages.length > 0 && (
                 allMessages.map((msg) =>
-                  <Message key={msg._id} text={msg.text} sender={msg.sender} createTime={msg.createdAt} file={msg.file} image={msg.image} />
+                  <Message key={msg._id} text={msg.text} sender={msg.sender} createTime={msg.createdAt} file={msg.file} image={msg.image} imgId={msg._id} />
                 )
               )}
             </div>
-            <div className="footer bg-blue-50 h-[9vh] px-4 py-2 flex items-center gap-2 border">
+            <div className="footer bg-blue-50 h-[9vh] px-4 py-2 flex items-center gap-2 border relative">
               <div className="w-[90%] flex items-center gap-2">
                 <input type="text" onChange={handleInputMessage} placeholder='Type a new message' className="w-[93%] px-4 py-3 rounded-md outline-none" value={message} />
                 <input ref={fileRef} type="file" onChange={(e) => setFile(e.target.files[0])} hidden accept='image/*' />
@@ -319,7 +345,10 @@ export default function Home() {
                   <MdOutlineAttachFile className='absolute text-2xl' />
                 </button>
               </div>
-              <button disabled={message === '' && fileUploadPercent !==100 &&fileUploadError} onClick={handleMessageSend} className="px-4 py-1 bg-blue-400 text-white rounded-md disabled:bg-blue-300 "><CiPaperplane className='text-4xl' /></button>
+              <button disabled={(message === '' && fileUploadPercent !== 100) || fileUploadError} onClick={handleMessageSend} className="px-4 py-1 bg-blue-400 text-white rounded-md disabled:bg-blue-300 "><CiPaperplane className='text-4xl' /></button>
+              {fileUploadError && <p className="absolute text-red-600 -top-[11px] left-[20px] font-semibold">Error Image Upload(image must be less than 2MB)</p>}
+              {(!fileUploadError && file && fileUploadPercent < 100) && <p className="absolute text-green-500 -top-[11px] left-[20px] font-semibold">{`File uploaded ${Math.round(fileUploadPercent)}%`}</p>}
+              {(!fileUploadError && file && fileUploadPercent === 100) && <p className="absolute text-green-500 -top-[11px] left-[20px] font-semibold">File is successfully uploaded</p>}
             </div>
           </div>
         )}
