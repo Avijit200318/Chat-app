@@ -15,6 +15,7 @@ import { getStorage, getDownloadURL, ref, uploadBytesResumable } from "firebase/
 import { app } from "../firebase";
 
 import { io } from "socket.io-client";
+import { Link } from 'react-router-dom';
 
 const ENDPOINT = 'http://localhost:3000';
 let socket;
@@ -278,7 +279,9 @@ export default function Home() {
           </div>
           <div className="flex flex-col items-center gap-6 text-gray-600">
             <IoSettingsOutline className='text-3xl' />
-            <img src={currentUser.avatar} alt="" className="w-10 h-10 rounded-full bg-yellow-300 overflow-hidden" />
+            <Link to='/profile'>
+              <img src={currentUser.avatar} alt="" className="w-10 h-10 rounded-full bg-yellow-300 overflow-hidden" />
+            </Link>
           </div>
         </div>
         <div className="col2 w-[85%] h-screen bg-white py-4 flex flex-col">
@@ -292,7 +295,7 @@ export default function Home() {
             </form>
           </div>
           {allUsers && (
-            allUsers.map((user, index) =>(
+            allUsers.map((user, index) => (
               (user._id !== currentUser._id) && (
                 <div key={index} style={{ background: `${user._id === reciverId ? 'rgb(239, 246, 255)' : ''}` }} onClick={() => handleSetReciverid(user._id)} className="flex items-center gap-6 py-2 border-b border-gray-500 transition-all duration-300 hover:bg-blue-50 cursor-pointer px-2">
                   <img src={user.avatar} alt="" className="w-10 h-10 rounded-full bg-blue-200" />
