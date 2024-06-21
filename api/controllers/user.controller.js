@@ -62,4 +62,18 @@ export const updateUser = async (req, res, next) => {
     }catch(error){
         next(error);
     }
-}
+};
+
+export const deleteUser = async (req, res, next) => {
+
+    if(req.user.id !== req.params.userId) return next(errorHandle(401, "You can only delete your own account"));
+    try{
+        const user = await userModel.findById(req.params.userId);
+        if(!user) return next(errorHandle(404, "User not found"));
+        await userModel.findByIdAndDelete(req.params.userId);
+        res.clearCookie('access_token');
+        res.status(200).json("User has been deleted");
+    }catch(error){
+        next(error);
+    }
+};

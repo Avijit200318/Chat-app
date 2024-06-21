@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import { app } from "../firebase";
 import { useDispatch } from 'react-redux';
-import { updateUserStart, updateUserFailure, updateUserSuccess, signOutSuccess, signOutFailure, signOutStart } from '../redux/user/userSlice';
+import { updateUserStart, updateUserFailure, updateUserSuccess, signOutSuccess, signOutFailure, signOutStart, deleteUserFailure, deleteUserStart, deleteUserSuccess } from '../redux/user/userSlice';
 
 export default function Profile() {
     const { currentUser, error, loading } = useSelector((state) => state.user);
@@ -15,10 +15,7 @@ export default function Profile() {
     const [fileUploadError, setFileUploadError] = useState(false);
     const [updateSuccess, setUpdateSuccess] = useState(false);
     const fileRef = useRef(null);
-    console.log(formData);
-    console.log("upload: ", fileUploadPercent);
     const dispatch = useDispatch();
-
     const handleInputChange = (e) => {
         setFormData({ ...formData, [e.target.id]: e.target.value });
     }
@@ -87,15 +84,35 @@ export default function Profile() {
         } catch (error) {
             dispatch(signOutFailure(error.message));
         }
-    }
+    };
+
+    const handleDeleteUser = async () => {
+        let ans = confirm("Do you want to delete this account?");
+        if(ans){
+            try{
+                dispatch(deleteUserStart());
+                const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+                    method: 'DELETE',
+                });
+                const data = await res.json();
+                if(data.success === false){
+                    dispatch(deleteUserFailure(data.message));
+                    return;
+                }
+                dispatch(deleteUserSuccess(data));
+            }catch(error){
+                dispatch(deleteUserFailure(error.message));
+            }
+        }
+    };
 
     return (
         <div className='w-full h-screen bg-blue-100 py-6 px-4'>
             <div className="w-full px-4">
                 <Link to='/'><FaArrowLeftLong className='text-2xl' /></Link>
             </div>
-            <h1 className="text-3xl text-center py-2">Profile</h1>
-            <div className="flex flex-col justify-center items-center py-6 border border-black">
+            <h1 className="text-3xl text-center">Profile</h1>
+            <div className="flex flex-col justify-center items-center py-4 border border-black">
                 <div onClick={() => fileRef.current.click()} className="w-28 h-28 rounded-full overflow-hidden border-4 border-white cursor-pointer">
                     <img src={formData.avatar || currentUser.avatar} alt="" className="w-full h-full object-cover" />
                 </div>
@@ -107,7 +124,8 @@ export default function Profile() {
                     (!fileUploadError && fileUploadPercent === 100) && <p className="text-sm font-semibold text-green-500">File Uploaded Successfully</p>
                 }
 
-                {!error && <p className="text-red-600 font-semibold text-center">{error}</p>}
+                {error && <p className="text-red-600 font-semibold text-center">{error}</p>}
+
                 {(!error && updateSuccess) && <p className="text-green-500 font-semibold text-center">Profile Updated successfully</p>}
             </div>
             <div className="flex justify-center border border-black px-4">
@@ -118,7 +136,8 @@ export default function Profile() {
                     <input type="text" onChange={handleInputChange} placeholder='status' id='status' className="px-4 py-3 border border-black rounded-md outline-none" autoComplete='off' defaultValue={currentUser.status} />
                     <input type="password" onChange={handleInputChange} placeholder='Update password' id='password' className="px-4 py-3 border border-black rounded-md outline-none" autoComplete='off' />
                     <button disabled={loading} className="px-4 py-3 rounded-md bg-blue-500 text-white font-semibold transition-all duration-300 hover:bg-blue-600 disabled:bg-blue-400">{loading ? 'Loading...' : 'Update'}</button>
-                    <button type='button' onClick={handleSignOut} className="px-4 py-3 rounded-md bg-red-500 text-white font-semibold">Log Out</button>
+                    <button type='button' onClick={handleSignOut} className="px-4 py-3 rounded-md bg-red-500 text-white font-semibold transition-all duration-300 hover:bg-red-600">Log Out</button>
+                    <button type='button' onClick={handleDeleteUser} className="px-4 py-3 rounded-md bg-red-500 text-white font-semibold transition-all duration-300 hover:bg-red-600">Delete Account</button>
                 </form>
             </div>
         </div>
