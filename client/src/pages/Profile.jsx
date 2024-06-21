@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useSelector } from 'react-redux';
 import { FaArrowLeftLong } from "react-icons/fa6";
-import {Link} from "react-router-dom";
-import {getDownloadURL, getStorage, ref, uploadBytesResumable} from "firebase/storage";
-import {app} from "../firebase";
+import { Link } from "react-router-dom";
+import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
+import { app } from "../firebase";
 import { useDispatch } from 'react-redux';
-import { updateUserStart, updateUserFailure, updateUserSuccess } from '../redux/user/userSlice';
+import { updateUserStart, updateUserFailure, updateUserSuccess, signOutSuccess, signOutFailure, signOutStart } from '../redux/user/userSlice';
 
 export default function Profile() {
     const { currentUser, error, loading } = useSelector((state) => state.user);
@@ -20,11 +20,11 @@ export default function Profile() {
     const dispatch = useDispatch();
 
     const handleInputChange = (e) => {
-        setFormData({...formData, [e.target.id]: e.target.value});
+        setFormData({ ...formData, [e.target.id]: e.target.value });
     }
 
     useEffect(() => {
-        if(file){
+        if (file) {
             handleFileUpload(file);
         }
     }, [file]);
@@ -35,7 +35,7 @@ export default function Profile() {
         const storageRef = ref(storage, fileName);
         const uploadTask = uploadBytesResumable(storageRef, file);
 
-        uploadTask.on('state_changed', 
+        uploadTask.on('state_changed',
             (snapshot) => {
                 const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
                 setFilePercent(Math.round(progress));
@@ -45,7 +45,7 @@ export default function Profile() {
             },
             () => {
                 getDownloadURL(uploadTask.snapshot.ref).then((downloadUrl) => {
-                    setFormData({...formData, avatar: downloadUrl});
+                    setFormData({ ...formData, avatar: downloadUrl });
                 });
             },
         );
@@ -53,7 +53,7 @@ export default function Profile() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        try{
+        try {
             dispatch(updateUserStart());
             const res = await fetch(`/api/user/update/${currentUser._id}`, {
                 method: 'POST',
@@ -63,14 +63,29 @@ export default function Profile() {
                 body: JSON.stringify(formData),
             });
             const data = await res.json();
-            if(data.success === false){
+            if (data.success === false) {
                 dispatch(updateUserFailure(data.message));
             }
-            console.log("updated user: ", data);
             dispatch(updateUserSuccess(data));
+            setFilePercent(0);
             setUpdateSuccess(true);
-        }catch(error){
+        } catch (error) {
             dispatch(updateUserFailure(error.message));
+        }
+    };
+
+    const handleSignOut = async () => {
+        try {
+            dispatch(signOutStart());
+            const res = await fetch("/api/auth/signout");
+            const data = await res.json();
+            if (data.success === false) {
+                dispatch(signOutFailure(data.message));
+                return;
+            }
+            dispatch(signOutSuccess(data));
+        } catch (error) {
+            dispatch(signOutFailure(error.message));
         }
     }
 
@@ -82,7 +97,7 @@ export default function Profile() {
             <h1 className="text-3xl text-center py-2">Profile</h1>
             <div className="flex flex-col justify-center items-center py-6 border border-black">
                 <div onClick={() => fileRef.current.click()} className="w-28 h-28 rounded-full overflow-hidden border-4 border-white cursor-pointer">
-                    <img src={currentUser.avatar} alt="" className="w-full h-full object-cover" />
+                    <img src={formData.avatar || currentUser.avatar} alt="" className="w-full h-full object-cover" />
                 </div>
                 {fileUploadError && <p className="text-sm font-semibold text-red-500">Error Image Upload(image must be less than 2MB)</p>}
                 {
@@ -91,19 +106,21 @@ export default function Profile() {
                 {
                     (!fileUploadError && fileUploadPercent === 100) && <p className="text-sm font-semibold text-green-500">File Uploaded Successfully</p>
                 }
+
+                {!error && <p className="text-red-600 font-semibold text-center">{error}</p>}
+                {(!error && updateSuccess) && <p className="text-green-500 font-semibold text-center">Profile Updated successfully</p>}
             </div>
-            <div className="flex justify-center border border-black p-4">
+            <div className="flex justify-center border border-black px-4">
                 <form onSubmit={handleSubmit} className="border-2 border-black w-[36%] flex flex-col gap-4 p-4 rounded-md">
                     <input ref={fileRef} onChange={(e) => setFile(e.target.files[0])} type="file" hidden accept='image/*' />
                     <input type="text" onChange={handleInputChange} placeholder='Username' id='username' className="px-4 py-3 border border-black rounded-md outline-none" autoComplete='off' defaultValue={currentUser.username} />
-                    <input type="email" onChange={handleInputChange} placeholder='email' id='email' className="px-4 py-3 border border-black rounded-md outline-none" autoComplete='off' defaultValue={currentUser.email}/>
+                    <input type="email" onChange={handleInputChange} placeholder='email' id='email' className="px-4 py-3 border border-black rounded-md outline-none" autoComplete='off' defaultValue={currentUser.email} />
                     <input type="text" onChange={handleInputChange} placeholder='status' id='status' className="px-4 py-3 border border-black rounded-md outline-none" autoComplete='off' defaultValue={currentUser.status} />
-                    <input type="password" onChange={handleInputChange} placeholder='Update password' id='password' className="px-4 py-3 border border-black rounded-md outline-none" autoComplete='off'/>
-                    <button disabled={loading} className="px-4 py-3 rounded-md bg-blue-500 text-white font-semibold transition-all duration-300 hover:bg-blue-600 disabled:bg-blue-400">{loading? 'Loading...' : 'Update'}</button>
+                    <input type="password" onChange={handleInputChange} placeholder='Update password' id='password' className="px-4 py-3 border border-black rounded-md outline-none" autoComplete='off' />
+                    <button disabled={loading} className="px-4 py-3 rounded-md bg-blue-500 text-white font-semibold transition-all duration-300 hover:bg-blue-600 disabled:bg-blue-400">{loading ? 'Loading...' : 'Update'}</button>
+                    <button type='button' onClick={handleSignOut} className="px-4 py-3 rounded-md bg-red-500 text-white font-semibold">Log Out</button>
                 </form>
             </div>
-            {error && <p className="text-red-500 text-sm font-semibold text-center">{error}</p>}
-            {(!error && updateSuccess)&& <p className="text-green-500 text-sm font-semibold text-center">Profile Updated successfully</p>}
         </div>
     )
 }
