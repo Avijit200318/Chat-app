@@ -112,8 +112,9 @@ export default function Profile() {
                 <Link to='/'><FaArrowLeftLong className='text-2xl' /></Link>
             </div>
             <h1 className="text-3xl text-center">Profile</h1>
-            <div className="flex flex-col justify-center items-center py-4 border border-black">
-                <div onClick={() => fileRef.current.click()} className="w-28 h-28 rounded-full overflow-hidden border-4 border-white cursor-pointer">
+            <div className="flex flex-col justify-center items-center py-4 border-2 border-white relative w-[35%] mx-auto rounded-md">
+                <div className="absolute w-full h-1/2 bg-blue-50 bottom-0 left-0 z-10"></div>
+                <div onClick={() => fileRef.current.click()} className="w-28 h-28 rounded-full overflow-hidden border-4 border-white cursor-pointer z-20">
                     <img src={formData.avatar || currentUser.avatar} alt="" className="w-full h-full object-cover" />
                 </div>
                 {fileUploadError && <p className="text-sm font-semibold text-red-500">Error Image Upload(image must be less than 2MB)</p>}
@@ -128,8 +129,8 @@ export default function Profile() {
 
                 {(!error && updateSuccess) && <p className="text-green-500 font-semibold text-center">Profile Updated successfully</p>}
             </div>
-            <div className="flex justify-center border border-black px-4">
-                <form onSubmit={handleSubmit} className="border-2 border-black w-[36%] flex flex-col gap-4 p-4 rounded-md">
+            <div className="flex justify-center border px-4">
+                <form onSubmit={handleSubmit} className="border-4 border-blue-50 w-[36%] flex flex-col gap-4 p-4 rounded-md">
                     <input ref={fileRef} onChange={(e) => setFile(e.target.files[0])} type="file" hidden accept='image/*' />
                     <input type="text" onChange={handleInputChange} placeholder='Username' id='username' className="px-4 py-3 border border-black rounded-md outline-none" autoComplete='off' defaultValue={currentUser.username} />
                     <input type="email" onChange={handleInputChange} placeholder='email' id='email' className="px-4 py-3 border border-black rounded-md outline-none" autoComplete='off' defaultValue={currentUser.email} />

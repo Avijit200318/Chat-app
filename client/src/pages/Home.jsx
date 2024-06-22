@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import { IoChatboxEllipsesOutline } from "react-icons/io5";
 import { MdGroup, MdOutlineAttachFile } from "react-icons/md";
 import { BsTools } from "react-icons/bs";
-import { IoSettingsOutline } from "react-icons/io5";
+import { IoSettingsOutline, IoClose } from "react-icons/io5";
 import { TfiAnnouncement } from "react-icons/tfi";
 import { IoIosSearch } from "react-icons/io";
 import { useSelector } from "react-redux";
@@ -50,9 +50,10 @@ export default function Home() {
   const [fileUrl, setFileUrl] = useState('');
   const [fileUploadError, setFileUploadError] = useState(null);
   const [fileUploadPercent, setFileUploadPercent] = useState(0);
-  console.log("fileUrl: ", fileUrl);
   const [searchText, setSearchText] = useState('');
-
+  const [open, setOpen] = useState(false);
+  const [messageSearch, setMessageSearch] = useState('');
+  console.log("messagesearch: ", messageSearch);
   useEffect(() => {
     setSocket(io(ENDPOINT));
 
@@ -88,7 +89,7 @@ export default function Home() {
     if (divRef.current) {
       divRef.current.scrollTop = divRef.current.scrollHeight;
     }
-  }, [allMessages]);
+  }, [allMessages, messageSearch]);
 
   useEffect(() => {
     const fetUsers = async () => {
@@ -269,8 +270,8 @@ export default function Home() {
 
   return (
     <div className='flex'>
-      <div className="left w-[30%] bg-yellow-400 h-screen flex pl-4">
-        <div className="col1 bg-blue-50 w-[15%] flex flex-col justify-between px-3 py-6 border-r-2 border-gray-400">
+      <div className="left w-[30%] h-screen flex pl-4">
+        <div className="col1 bg-blue-100 w-[15%] flex flex-col justify-between px-3 py-6 border-l-2 border-r-2 border-gray-400">
           <div className="flex flex-col items-center gap-6 text-gray-600">
             <IoChatboxEllipsesOutline className='text-2xl' />
             <MdGroup className='text-2xl' />
@@ -290,24 +291,26 @@ export default function Home() {
             {room && <p className="text-xs sm:px-4 sm:text-sm">room: {room._id}</p>}
 
             <form onSubmit={handleSearchUser} className="border border-black flex my-4 overflow-hidden rounded-full bg-blue-50">
-              <input type="text" onChange={(e) => setSearchText(e.target.value)} value={searchText} placeholder='Search using username or email' className="px-4 py-2 w-[85%] outline-none bg-transparent placeholder:truncate" />
+              <input type="text" onChange={(e) => setSearchText(e.target.value)} value={searchText} placeholder='Search username or email' className="px-4 py-2 w-[85%] outline-none bg-transparent placeholder:truncate" />
               <button className='py-2 px-4 text-2xl w-[15%]'><IoIosSearch /></button>
             </form>
           </div>
-          {allUsers && (
-            allUsers.map((user, index) => (
-              (user._id !== currentUser._id) && (
-                <div key={index} style={{ background: `${user._id === reciverId ? 'rgb(239, 246, 255)' : ''}` }} onClick={() => handleSetReciverid(user._id)} className="flex items-center gap-6 py-2 border-b border-gray-500 transition-all duration-300 hover:bg-blue-50 cursor-pointer px-2">
-                  <img src={user.avatar} alt="" className="w-10 h-10 rounded-full bg-blue-200" />
-                  <div className="flex flex-col gap-2">
-                    <h1 className="text-lg truncate">{user.username}</h1>
-                    <p className="text-xs text-gray-500 font-semibold">{user.status}</p>
+          <div className='overflow-y-auto scrollbar-custom'>
+            {allUsers && (
+              allUsers.map((user, index) => (
+                (user._id !== currentUser._id) && (
+                  <div key={index} style={{ background: `${user._id === reciverId ? 'rgb(220, 235, 255)' : ''}` }} onClick={() => handleSetReciverid(user._id)} className="flex items-center gap-6 py-2 border-b border-gray-500 transition-all duration-300 hover:bg-blue-100 cursor-pointer px-2">
+                    <img src={user.avatar} alt="" className="w-10 h-10 rounded-full bg-blue-200" />
+                    <div className="flex flex-col gap-2">
+                      <h1 className="text-lg truncate">{user.username}</h1>
+                      <p className="text-xs text-gray-500 font-semibold">{user.status}</p>
+                    </div>
                   </div>
-                </div>
+                )
               )
-            )
-            )
-          )}
+              )
+            )}
+          </div>
         </div>
       </div>
       <div className="right w-[70%] h-screen border-l-4 border-gray-300 relative">
@@ -324,7 +327,7 @@ export default function Home() {
         )}
         {reciverData && (
           <div>
-            <div className="header bg-blue-50 h-[9vh] px-4 py-2">
+            <div className="header bg-blue-50 h-[9vh] px-4 py-2 border-b-2 shadow-md flex justify-between items-center relative overflow-hidden">
               <div className="flex items-center gap-4">
                 <img src={reciverData.avatar} alt="" className="h-12 w-12 rounded-full overflow-hidden bg-yellow-300" />
                 <div className="">
@@ -332,10 +335,17 @@ export default function Home() {
                   {typing && <p className='text-xs font-semibold text-gray-600 pl-1'>Typing...</p>}
                 </div>
               </div>
+              <button onClick={() => setOpen(true)} className="transition-all duration-300 hover:bg-blue-200 p-2 mr-4 rounded-full"><IoIosSearch className='text-2xl' /></button>
+              <div className={`absolute w-full h-[9vh] bg-blue-50 top-0  transition-all duration-500 ${open ? 'left-0' : 'left-[100%]'} flex items-center justify-between px-6`}>
+                <input onChange={(e)=> setMessageSearch(e.target.value) } type="text" placeholder='Search...' value={messageSearch} className="px-4 py-2 w-[95%] outline-none border rounded-md" />
+                <div className="transition duration-300 hover:bg-blue-100 p-2 rounded-full">
+                  <IoClose onClick={() => {setOpen(false); setMessageSearch('')}} className='text-2xl cursor-pointer' />
+                </div>
+              </div>
             </div>
-            <div ref={divRef} className="chatBox w-full h-[82vh] overflow-y-auto">
+            <div ref={divRef} className="chatBox w-full h-[82vh] overflow-y-auto scrollbar-custom">
               {allMessages.length > 0 && (
-                allMessages.map((msg) =>
+                allMessages.filter((mssg) => mssg.text.includes(messageSearch)).map((msg) =>
                   <Message key={msg._id} text={msg.text} sender={msg.sender} createTime={msg.createdAt} file={msg.file} image={msg.image} imgId={msg._id} />
                 )
               )}

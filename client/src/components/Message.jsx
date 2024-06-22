@@ -26,7 +26,7 @@ export default function Message({ text, sender, createTime, file, image, imgId})
 
     return (
         <div style={{ justifyContent: `${currentUser._id === sender ? 'end' : 'start'}` }} className='my-2 py-2 flex px-12'>
-            <div style={{ background: `${currentUser._id === sender ? '#5cf39f' : ''}` }} className="bg-blue-400 inline-block max-w-[55%] p-2 rounded-md">
+            <div style={{ background: `${currentUser._id === sender ? '#5cf39f' : ''}`}} className={`bg-blue-400 inline-block max-w-[55%] p-2 rounded-lg relative ${currentUser._id === sender? 'rounded-tr-none': 'rounded-tl-none'}`}>
                 {(file && image) && (
                     <div className="w-40 h-40 bg-white relative">
                         <img src={image} alt="" className="w-full h-full object-contain" />
@@ -36,9 +36,9 @@ export default function Message({ text, sender, createTime, file, image, imgId})
                         </div>
                     </div>
                 )}
-                <p className="break-all whitespace-normal">{text}</p>
+                <p className="break-all text-sm whitespace-normal">{text}</p>
                 <div className="min-w-16 h-4">
-                    <h2 className="text-[0.65rem] float-end min-w-[10%]">{showTime(createTime)}</h2>
+                    <h2 className="text-[0.65rem] float-end min-w-[10%] font-semibold text-gray-700">{showTime(createTime)}</h2>
                 </div>
             </div>
         </div>
