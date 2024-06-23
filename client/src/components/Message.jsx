@@ -4,6 +4,8 @@ import { LuArrowDownToLine } from "react-icons/lu";
 import { MdDelete } from "react-icons/md";
 
 import { saveAs } from 'file-saver'
+import { getStorage, ref, deleteObject } from 'firebase/storage';
+import { app } from '../firebase';
 
 
 export default function Message({ text, sender, createTime, file, image, imgId, handleDeleteImage }) {
@@ -30,6 +32,24 @@ export default function Message({ text, sender, createTime, file, image, imgId, 
         }
     };
 
+    const deleteFirebaseImage = async (imgUrl, messageId) => {
+        await handleDeleteImage(messageId);
+
+        const storage = getStorage(app);
+        // Extracting the file name from the URL
+        const decodedUrl = decodeURIComponent(imgUrl); // Decode the URL
+        const fileName = decodedUrl.substring(decodedUrl.lastIndexOf('/') + 1).split('?')[0];
+
+        console.log("file name is ", fileName);
+        const storageRef = ref(storage, fileName);
+        try {
+            await deleteObject(storageRef);
+            console.log("File deleted successfully");
+        } catch (error) {
+            console.error("Error deleting file:", error);
+        }
+    };
+
     return (
         <div style={{ justifyContent: `${currentUser._id === sender ? 'end' : 'start'}` }} className='my-2 py-2 flex px-12'>
             <div style={{ background: `${currentUser._id === sender ? '#5cf39f' : ''}` }} className={`bg-blue-400 inline-block max-w-[55%] p-2 rounded-lg relative ${currentUser._id === sender ? 'rounded-tr-none' : 'rounded-tl-none'}`}>
@@ -38,7 +58,7 @@ export default function Message({ text, sender, createTime, file, image, imgId, 
                         <img src={image} alt="" className="w-full h-full object-contain" />
                         <div className="absolute bottom-0 right-0 flex items-center gap-1">
                             {sender === currentUser._id && (
-                                <button onClick={() => handleDeleteImage(imgId)} className="p-1 rounded-full bg-gray-200  transition-all duration-300 hover:bg-red-400 hover:text-white"><MdDelete className='text-lg' /></button>
+                                <button onClick={() => deleteFirebaseImage(image, imgId)} className="p-1 rounded-full bg-gray-200  transition-all duration-300 hover:bg-red-400 hover:text-white"><MdDelete className='text-lg' /></button>
                             )}
                             <button onClick={() => handleImageDownload(image)} className="p-1 rounded-full bg-gray-200 transition-all duration-300 hover:bg-gray-300 hover:text-white"><LuArrowDownToLine className='text-base' /></button>
                         </div>
