@@ -3,8 +3,10 @@ import { useSelector } from 'react-redux'
 import { LuArrowDownToLine } from "react-icons/lu";
 import { MdDelete } from "react-icons/md";
 
+import { saveAs } from 'file-saver'
 
-export default function Message({ text, sender, createTime, file, image, imgId}) {
+
+export default function Message({ text, sender, createTime, file, image, imgId, handleDeleteImage }) {
     const { currentUser } = useSelector((state) => state.user);
 
     const showTime = () => {
@@ -17,22 +19,28 @@ export default function Message({ text, sender, createTime, file, image, imgId})
     };
 
     const handleImageDownload = async (imgUrl) => {
-        
-    };
+        try {
+            const response = await fetch(imgUrl);
+            if (!response.ok) throw new Error('Network response was not ok');
 
-    const handleDeleteImage = async (imgId) => {
-        
-    }
+            const blob = await response.blob();
+            saveAs(blob, 'image.jpg');
+        } catch (error) {
+            console.error('Error downloading the image', error);
+        }
+    };
 
     return (
         <div style={{ justifyContent: `${currentUser._id === sender ? 'end' : 'start'}` }} className='my-2 py-2 flex px-12'>
-            <div style={{ background: `${currentUser._id === sender ? '#5cf39f' : ''}`}} className={`bg-blue-400 inline-block max-w-[55%] p-2 rounded-lg relative ${currentUser._id === sender? 'rounded-tr-none': 'rounded-tl-none'}`}>
+            <div style={{ background: `${currentUser._id === sender ? '#5cf39f' : ''}` }} className={`bg-blue-400 inline-block max-w-[55%] p-2 rounded-lg relative ${currentUser._id === sender ? 'rounded-tr-none' : 'rounded-tl-none'}`}>
                 {(file && image) && (
                     <div className="w-40 h-40 bg-white relative">
                         <img src={image} alt="" className="w-full h-full object-contain" />
                         <div className="absolute bottom-0 right-0 flex items-center gap-1">
-                            <button onClick={() => handleDeleteImage(imgId)} className="p-1 rounded-full bg-gray-200  transition-all duration-300 hover:bg-gray-400 hover:text-white"><MdDelete className='text-lg' /></button>
-                            <button onClick={() => handleImageDownload(image)} className="p-1 rounded-full bg-gray-200 transition-all duration-300 hover:bg-gray-400 hover:text-white"><LuArrowDownToLine className='text-base' /></button>
+                            {sender === currentUser._id && (
+                                <button onClick={() => handleDeleteImage(imgId)} className="p-1 rounded-full bg-gray-200  transition-all duration-300 hover:bg-red-400 hover:text-white"><MdDelete className='text-lg' /></button>
+                            )}
+                            <button onClick={() => handleImageDownload(image)} className="p-1 rounded-full bg-gray-200 transition-all duration-300 hover:bg-gray-300 hover:text-white"><LuArrowDownToLine className='text-base' /></button>
                         </div>
                     </div>
                 )}

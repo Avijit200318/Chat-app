@@ -53,7 +53,6 @@ export default function Home() {
   const [searchText, setSearchText] = useState('');
   const [open, setOpen] = useState(false);
   const [messageSearch, setMessageSearch] = useState('');
-  console.log("messagesearch: ", messageSearch);
   useEffect(() => {
     setSocket(io(ENDPOINT));
 
@@ -79,6 +78,10 @@ export default function Home() {
 
       socket.on('typing-stoped-from-server', () => {
         setTyping(false);
+      })
+
+      socket.on('message-delete-server', (data) => {
+        setAllMessages((prev) => prev.filter((message) => message._id !== data.messageId));
       })
 
     }
@@ -266,7 +269,24 @@ export default function Home() {
     } catch (error) {
       console.log(error);
     }
-  }
+  };
+
+  const handleDeleteImage = async (msgId) => {
+    try{
+      const res = await fetch(`/api/message/delete/${msgId}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if(data.success === false){
+        console.log(data.message);
+        return;
+      }
+      setAllMessages((prev) => prev.filter((message) => message._id !== msgId));
+      socket.emit('message-delete', {roomId: room._id, messageId: msgId});
+    }catch(error){
+      console.log(error);
+    }
+  };
 
   return (
     <div className='flex'>
@@ -281,7 +301,7 @@ export default function Home() {
           <div className="flex flex-col items-center gap-6 text-gray-600">
             <IoSettingsOutline className='text-3xl' />
             <Link to='/profile'>
-              <img src={currentUser.avatar} alt="" className="w-10 h-10 rounded-full bg-yellow-300 overflow-hidden" />
+              <img src={currentUser.avatar} alt="" className="w-10 h-10 rounded-full bg-yellow-300 overflow-hidden border border-gray-600" />
             </Link>
           </div>
         </div>
@@ -346,7 +366,7 @@ export default function Home() {
             <div ref={divRef} className="chatBox w-full h-[82vh] overflow-y-auto scrollbar-custom">
               {allMessages.length > 0 && (
                 allMessages.filter((mssg) => mssg.text.includes(messageSearch)).map((msg) =>
-                  <Message key={msg._id} text={msg.text} sender={msg.sender} createTime={msg.createdAt} file={msg.file} image={msg.image} imgId={msg._id} />
+                  <Message key={msg._id} text={msg.text} sender={msg.sender} createTime={msg.createdAt} file={msg.file} image={msg.image} imgId={msg._id} handleDeleteImage={handleDeleteImage} />
                 )
               )}
             </div>

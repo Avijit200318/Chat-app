@@ -18,6 +18,12 @@ export const sockets = (socket) => {
         skt.emit('message-from-server', {message});
     })
 
+    socket.on('message-delete', ({messageId, roomId}) => {
+        let skt = socket.broadcast;
+        skt = roomId ? skt.to(roomId) : skt;
+        skt.emit('message-delete-server', {messageId});
+    })
+
     socket.on('typing-started', ({roomId}) => {
         let skt = socket.broadcast;
         skt = roomId ? skt.to(roomId) : skt;

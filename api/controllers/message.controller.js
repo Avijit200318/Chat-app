@@ -72,11 +72,15 @@ export const getUserChatRoom = async (req, res, next) => {
 export const deleteMessage = async (req, res, next) => {
     try{
         const message = await messageModel.findById(req.params.id);
+
         if(!message) return next(errorHandle(404, "message not found"));
+
         if(message.sender.equals(new ObjectId(req.user.id))) return next(errorHandle(401, "You can only delete your own messages"));
+
         await messageModel.findByIdAndDelete(req.params.id);
+
         res.status(200).json("message deleted successfully");
     }catch(error){
         next(error);
     }
-}
+};
