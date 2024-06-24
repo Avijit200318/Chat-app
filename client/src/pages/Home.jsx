@@ -53,9 +53,11 @@ export default function Home() {
   const [searchText, setSearchText] = useState('');
   const [open, setOpen] = useState(false);
   const [messageSearch, setMessageSearch] = useState('');
+  const [online, setOnline] = useState(null);
+  console.log("online: ", online);
+
   useEffect(() => {
     setSocket(io(ENDPOINT));
-
   }, []);
 
   useEffect(() => {
@@ -84,6 +86,11 @@ export default function Home() {
         setAllMessages((prev) => prev.filter((message) => message._id !== data.messageId));
       })
 
+      socket.emit('register', { user: currentUser });
+
+      socket.on('user-online', (data) => {
+        setOnline(data.connectedUsers);
+      })
     }
   }, [socket]);
 
@@ -205,7 +212,9 @@ export default function Home() {
     if (recId) {
       setReciverId(recId);
       dispatch(messageSuccess({ rediverRedux: recId }));
-      socket.emit('leave-room', { roomId: room._id });
+      if(room){
+        socket.emit('leave-room', { roomId: room._id });
+      }
     }
   };
 
@@ -272,18 +281,18 @@ export default function Home() {
   };
 
   const handleDeleteImage = async (msgId) => {
-    try{
+    try {
       const res = await fetch(`/api/message/delete/${msgId}`, {
         method: 'DELETE',
       });
       const data = await res.json();
-      if(data.success === false){
+      if (data.success === false) {
         console.log(data.message);
         return;
       }
       setAllMessages((prev) => prev.filter((message) => message._id !== msgId));
-      socket.emit('message-delete', {roomId: room._id, messageId: msgId});
-    }catch(error){
+      socket.emit('message-delete', { roomId: room._id, messageId: msgId });
+    } catch (error) {
       console.log(error);
     }
   };
@@ -320,7 +329,12 @@ export default function Home() {
               allUsers.map((user, index) => (
                 (user._id !== currentUser._id) && (
                   <div key={index} style={{ background: `${user._id === reciverId ? 'rgb(220, 235, 255)' : ''}` }} onClick={() => handleSetReciverid(user._id)} className="flex items-center gap-6 py-2 border-b border-gray-500 transition-all duration-300 hover:bg-blue-100 cursor-pointer px-2">
-                    <img src={user.avatar} alt="" className="w-10 h-10 rounded-full bg-blue-200" />
+                    <div style={{border: `${(online &&online.some((obj) => Object.values(obj).includes(user._id))) ? '3px solid yellow' : ''}`}} className="w-auto h-auto relative bg-yellow-500 rounded-full">
+                      <img src={user.avatar} alt="" className="w-10 h-10 rounded-full bg-blue-200" />
+                      {(online &&online.some((obj) => Object.values(obj).includes(user._id))) && (
+                        <div className="onlineFinder absolute w-4 h-4 bg-[#fdfd00] rounded-full bottom-0 right-0"></div>
+                      )}
+                    </div>
                     <div className="flex flex-col gap-2">
                       <h1 className="text-lg truncate">{user.username}</h1>
                       <p className="text-xs text-gray-500 font-semibold">{user.status}</p>
@@ -357,9 +371,9 @@ export default function Home() {
               </div>
               <button onClick={() => setOpen(true)} className="transition-all duration-300 hover:bg-blue-200 p-2 mr-4 rounded-full"><IoIosSearch className='text-2xl' /></button>
               <div className={`absolute w-full h-[9vh] bg-blue-50 top-0  transition-all duration-500 ${open ? 'left-0' : 'left-[100%]'} flex items-center justify-between px-6`}>
-                <input onChange={(e)=> setMessageSearch(e.target.value) } type="text" placeholder='Search...' value={messageSearch} className="px-4 py-2 w-[95%] outline-none border rounded-md" />
+                <input onChange={(e) => setMessageSearch(e.target.value)} type="text" placeholder='Search...' value={messageSearch} className="px-4 py-2 w-[95%] outline-none border rounded-md" />
                 <div className="transition duration-300 hover:bg-blue-100 p-2 rounded-full">
-                  <IoClose onClick={() => {setOpen(false); setMessageSearch('')}} className='text-2xl cursor-pointer' />
+                  <IoClose onClick={() => { setOpen(false); setMessageSearch('') }} className='text-2xl cursor-pointer' />
                 </div>
               </div>
             </div>
@@ -370,7 +384,7 @@ export default function Home() {
                 )
               )}
             </div>
-            <div className="footer bg-blue-50 h-[9vh] px-4 py-2 flex items-center gap-2 border relative">
+            <div className="footer bg-blue-100 h-[9vh] px-4 py-2 flex items-center gap-2 border-t-2 border-gray-400 relative">
               <div className="w-[90%] flex items-center gap-2">
                 <input type="text" onChange={handleInputMessage} placeholder='Type a new message' className="w-[93%] px-4 py-3 rounded-md outline-none" value={message} />
                 <input ref={fileRef} type="file" onChange={(e) => setFile(e.target.files[0])} hidden accept='image/*' />

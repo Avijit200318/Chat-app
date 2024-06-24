@@ -25,8 +25,6 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(cors());
 
-const users = [{}];
-
 const server = createServer(app);
 const io = new Server(server, {
     cors: {

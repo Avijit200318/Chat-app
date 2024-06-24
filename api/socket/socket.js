@@ -1,5 +1,14 @@
+let connectedUsers = [];
 export const sockets = (socket) => {
     console.log("connected to socket io");
+
+    socket.on('register', ({user}) => {
+        connectedUsers.push({[socket.id]: user._id});
+        socket.emit('user-online', {connectedUsers});
+        socket.broadcast.emit('user-online', {connectedUsers});
+        // console.log("registerd user:", connectedUsers);
+    })
+
 
     socket.on('join-room', ({roomId}) => {
         socket.join(roomId);
@@ -37,6 +46,9 @@ export const sockets = (socket) => {
     })
 
     socket.on('disconnect', () => {
-        console.log("user left ");
+        connectedUsers = connectedUsers.filter((obj) => !obj.hasOwnProperty(socket.id) )
+        socket.broadcast.emit('user-online', {connectedUsers});
+        console.log("user left");
+        // console.log("array: ", connectedUsers);
     });
 }
