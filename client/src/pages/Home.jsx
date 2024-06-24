@@ -212,7 +212,7 @@ export default function Home() {
     if (recId) {
       setReciverId(recId);
       dispatch(messageSuccess({ rediverRedux: recId }));
-      if(room){
+      if (room) {
         socket.emit('leave-room', { roomId: room._id });
       }
     }
@@ -329,9 +329,9 @@ export default function Home() {
               allUsers.map((user, index) => (
                 (user._id !== currentUser._id) && (
                   <div key={index} style={{ background: `${user._id === reciverId ? 'rgb(220, 235, 255)' : ''}` }} onClick={() => handleSetReciverid(user._id)} className="flex items-center gap-6 py-2 border-b border-gray-500 transition-all duration-300 hover:bg-blue-100 cursor-pointer px-2">
-                    <div style={{border: `${(online &&online.some((obj) => Object.values(obj).includes(user._id))) ? '3px solid yellow' : ''}`}} className="w-auto h-auto relative bg-yellow-500 rounded-full">
+                    <div style={{ border: `${(online && online.some((obj) => Object.values(obj).includes(user._id))) ? '3px solid yellow' : ''}` }} className="w-auto h-auto relative bg-yellow-500 rounded-full">
                       <img src={user.avatar} alt="" className="w-10 h-10 rounded-full bg-blue-200" />
-                      {(online &&online.some((obj) => Object.values(obj).includes(user._id))) && (
+                      {(online && online.some((obj) => Object.values(obj).includes(user._id))) && (
                         <div className="onlineFinder absolute w-4 h-4 bg-[#fdfd00] rounded-full bottom-0 right-0"></div>
                       )}
                     </div>
@@ -363,7 +363,9 @@ export default function Home() {
           <div>
             <div className="header bg-blue-50 h-[9vh] px-4 py-2 border-b-2 shadow-md flex justify-between items-center relative overflow-hidden">
               <div className="flex items-center gap-4">
-                <img src={reciverData.avatar} alt="" className="h-12 w-12 rounded-full overflow-hidden bg-yellow-300" />
+                <Link to={`/userProfile/${reciverData._id}`}>
+                  <img src={reciverData.avatar} alt="" className="h-12 w-12 rounded-full overflow-hidden bg-yellow-300" />
+                </Link>
                 <div className="">
                   <h1 className="text-lg">{reciverData.username}</h1>
                   {typing && <p className='text-xs font-semibold text-gray-600 pl-1'>Typing...</p>}

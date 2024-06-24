@@ -84,3 +84,19 @@ export const deleteMessage = async (req, res, next) => {
         next(error);
     }
 };
+
+export const clearChat = async (req, res, next) => {
+    try{
+        const userId = req.user.id;
+        const reciverId = req.params.id;
+        await messageModel.deleteMany({
+            $or: [
+                {sender: userId, reciver: reciverId},
+                {sender: reciverId, reciver: userId}
+            ]
+        });
+        res.status(200).json("Chat is clear now");
+    }catch(error){
+        next(error);
+    }
+};
