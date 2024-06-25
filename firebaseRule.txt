@@ -1,0 +1,16 @@
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read;
+      allow write: if
+      request.resource.size < 2 * 1024 * 1024 &&
+      (request.resource.contentType.matches('image/.*') ||
+         request.resource.contentType == 'application/pdf' ||
+         request.resource.contentType == 'application/msword' ||
+         request.resource.contentType == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+         request.resource.contentType == 'application/vnd.ms-powerpoint' ||
+         request.resource.contentType == 'application/vnd.openxmlformats-officedocument.presentationml.presentation');
+      allow delete;
+    }
+  }
+}
