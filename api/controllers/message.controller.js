@@ -22,7 +22,8 @@ export const sendMessage = async (req, res, next) => {
             reciver: reciverId,
             text: req.body.message,
             file: req.body.file,
-            image: req.body.image,
+            url: req.body.url,
+            fileType: req.body.fileType,
         });
         return res.status(201).json(newMessage);
     }catch(error){

@@ -8,8 +8,14 @@ import { getStorage, ref, deleteObject } from 'firebase/storage';
 import { app } from '../firebase';
 
 
-export default function Message({ text, sender, createTime, file, image, imgId, handleDeleteImage }) {
+export default function Message({ text, sender, createTime, file, url, imgId, handleDeleteImage, fileType }) {
     const { currentUser } = useSelector((state) => state.user);
+    const pdfImage = 'https://firebasestorage.googleapis.com/v0/b/chat-app-bd4d2.appspot.com/o/pdf.avif?alt=media&token=0c29950c-4994-40db-94c0-8b041a00a688';
+    const wordImage = 'https://firebasestorage.googleapis.com/v0/b/chat-app-bd4d2.appspot.com/o/word.png?alt=media&token=a59b2874-1ed5-4ba1-8737-63ecb07e1ca8';
+    const pptImage = 'https://firebasestorage.googleapis.com/v0/b/chat-app-bd4d2.appspot.com/o/ppt.png?alt=media&token=e64419a2-f9df-46e1-9555-5bc32938f906';
+
+    
+    // console.log("fileName", fileNamex)
 
     const showTime = () => {
         const date = new Date(createTime);
@@ -20,13 +26,22 @@ export default function Message({ text, sender, createTime, file, image, imgId, 
         return date.toLocaleTimeString('en-US', options);
     };
 
-    const handleImageDownload = async (imgUrl) => {
+    const handleImageDownload = async (imgUrl, fileType) => {
         try {
             const response = await fetch(imgUrl);
+            const fileName = imgUrl.split('/').pop().split('#')[0].split('?')[0] || 'downloaded_file';
             if (!response.ok) throw new Error('Network response was not ok');
 
             const blob = await response.blob();
-            saveAs(blob, 'image.jpg');
+            if (fileType === 'image') {
+                saveAs(blob, `${fileName}.jpg`);
+            }else if(fileType === 'pdf'){
+                saveAs(blob,`${fileName}.pdf`);
+            }else if(fileType === 'word'){
+                saveAs(blob, `${fileName}.docx`);
+            }else if(fileType === 'ppt'){
+                saveAs(blob, `${fileName}.pptx`);
+            }
         } catch (error) {
             console.error('Error downloading the image', error);
         }
@@ -53,14 +68,25 @@ export default function Message({ text, sender, createTime, file, image, imgId, 
     return (
         <div style={{ justifyContent: `${currentUser._id === sender ? 'end' : 'start'}` }} className='my-2 py-2 flex px-12'>
             <div style={{ background: `${currentUser._id === sender ? '#5cf39f' : ''}` }} className={`bg-blue-400 inline-block max-w-[55%] p-2 rounded-lg relative ${currentUser._id === sender ? 'rounded-tr-none' : 'rounded-tl-none'}`}>
-                {(file && image) && (
+                {(file && fileType === 'image') && (
                     <div className="w-40 h-40 bg-white relative">
-                        <img src={image} alt="" className="w-full h-full object-contain" />
+                        <img src={url} alt="" className="w-full h-full object-contain" />
                         <div className="absolute bottom-0 right-0 flex items-center gap-1">
                             {sender === currentUser._id && (
-                                <button onClick={() => deleteFirebaseImage(image, imgId)} className="p-1 rounded-full bg-gray-200  transition-all duration-300 hover:bg-red-400 hover:text-white"><MdDelete className='text-lg' /></button>
+                                <button onClick={() => deleteFirebaseImage(url, imgId)} className="p-1 rounded-full bg-gray-200  transition-all duration-300 hover:bg-red-400 hover:text-white"><MdDelete className='text-lg' /></button>
                             )}
-                            <button onClick={() => handleImageDownload(image)} className="p-1 rounded-full bg-gray-200 transition-all duration-300 hover:bg-gray-300 hover:text-white"><LuArrowDownToLine className='text-base' /></button>
+                            <button onClick={() => handleImageDownload(url)} className="p-1 rounded-full bg-gray-200 transition-all duration-300 hover:bg-gray-300 hover:text-white"><LuArrowDownToLine className='text-base' /></button>
+                        </div>
+                    </div>
+                )}
+                {(file && fileType && fileType !== 'image') && (
+                    <div className="w-40 h-24 bg-white relative">
+                        <img src={fileType === 'pdf' ? pdfImage : fileType === 'word' ? wordImage : pptImage} alt="" className="w-full h-full object-contain" />
+                        <div className="absolute bottom-0 right-0 flex items-center gap-1">
+                            {sender === currentUser._id && (
+                                <button onClick={() => deleteFirebaseImage(url, imgId)} className="p-1 rounded-full bg-gray-200  transition-all duration-300 hover:bg-red-400 hover:text-white"><MdDelete className='text-lg' /></button>
+                            )}
+                            <button onClick={() => handleImageDownload(url, fileType)} className="p-1 rounded-full bg-gray-200 transition-all duration-300 hover:bg-gray-300 hover:text-white"><LuArrowDownToLine className='text-base' /></button>
                         </div>
                     </div>
                 )}

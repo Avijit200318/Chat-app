@@ -54,7 +54,9 @@ export default function Home() {
   const [open, setOpen] = useState(false);
   const [messageSearch, setMessageSearch] = useState('');
   const [online, setOnline] = useState(null);
-  console.log("online: ", online);
+  const [fileType, setFileType] = useState(null);
+  console.log(file);
+  console.log("fileType: ", fileType);
 
   useEffect(() => {
     setSocket(io(ENDPOINT));
@@ -190,7 +192,8 @@ export default function Home() {
           message,
           userId: currentUser._id,
           file: fileUrl ? true : false,
-          image: fileUrl
+          url: fileUrl,
+          fileType: fileType,
         })
       });
       const data = await res.json();
@@ -232,6 +235,7 @@ export default function Home() {
   useEffect(() => {
     if (file) {
       handleFileUpload(file);
+      fileTypeDetect();
     }
   }, [file]);
 
@@ -297,6 +301,26 @@ export default function Home() {
     }
   };
 
+  const fileTypeDetect = () => {
+    if(file){
+      const typeFile = file.type;
+      console.log("what file: ", typeFile);
+
+      // Determine the file type based on MIME type
+      if (typeFile.startsWith('image/')) {
+        setFileType('image');
+      } else if (typeFile === 'application/pdf') {
+        setFileType('pdf');
+      } else if (typeFile === 'application/msword' ||
+                 typeFile === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+        setFileType('word');
+      } else if (typeFile === 'application/vnd.ms-powerpoint' ||
+                 typeFile === 'application/vnd.openxmlformats-officedocument.presentationml.presentation') {
+        setFileType('ppt');
+      }
+    }
+  };
+
   return (
     <div className='flex'>
       <div className="left w-[30%] h-screen flex pl-4">
@@ -330,7 +354,7 @@ export default function Home() {
                 (user._id !== currentUser._id) && (
                   <div key={index} style={{ background: `${user._id === reciverId ? 'rgb(220, 235, 255)' : ''}` }} onClick={() => handleSetReciverid(user._id)} className="flex items-center gap-6 py-2 border-b border-gray-500 transition-all duration-300 hover:bg-blue-100 cursor-pointer px-2">
                     <div style={{ border: `${(online && online.some((obj) => Object.values(obj).includes(user._id))) ? '3px solid yellow' : ''}` }} className="w-auto h-auto relative bg-yellow-500 rounded-full">
-                      <img src={user.avatar} alt="" className="w-10 h-10 rounded-full bg-blue-200" />
+                      <img src={user.avatar} alt="" className="w-10 h-10 rounded-full bg-blue-200 border border-gray-400" />
                       {(online && online.some((obj) => Object.values(obj).includes(user._id))) && (
                         <div className="onlineFinder absolute w-4 h-4 bg-[#fdfd00] rounded-full bottom-0 right-0"></div>
                       )}
@@ -382,14 +406,14 @@ export default function Home() {
             <div ref={divRef} className="chatBox w-full h-[82vh] overflow-y-auto scrollbar-custom">
               {allMessages.length > 0 && (
                 allMessages.filter((mssg) => mssg.text.includes(messageSearch)).map((msg) =>
-                  <Message key={msg._id} text={msg.text} sender={msg.sender} createTime={msg.createdAt} file={msg.file} image={msg.image} imgId={msg._id} handleDeleteImage={handleDeleteImage} />
+                  <Message key={msg._id} text={msg.text} sender={msg.sender} createTime={msg.createdAt} file={msg.file} url={msg.url} imgId={msg._id} handleDeleteImage={handleDeleteImage} fileType={msg.fileType} />
                 )
               )}
             </div>
             <div className="footer bg-blue-100 h-[9vh] px-4 py-2 flex items-center gap-2 border-t-2 border-gray-400 relative">
               <div className="w-[90%] flex items-center gap-2">
                 <input type="text" onChange={handleInputMessage} placeholder='Type a new message' className="w-[93%] px-4 py-3 rounded-md outline-none" value={message} />
-                <input ref={fileRef} type="file" onChange={(e) => setFile(e.target.files[0])} hidden accept='image/*' />
+                <input ref={fileRef} type="file" onChange={(e) => setFile(e.target.files[0])} hidden />
                 <button onClick={() => fileRef.current.click()} className="p-5 flex justify-center items-center rounded-full transition-all duration-300 hover:bg-gray-300">
                   <MdOutlineAttachFile className='absolute text-2xl' />
                 </button>

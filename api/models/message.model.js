@@ -18,7 +18,11 @@ const messageSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
-    image: {
+    url: {
+        type: String,
+        default: '',
+    },
+    fileType: {
         type: String,
         default: '',
     }
