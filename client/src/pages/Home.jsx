@@ -4,7 +4,7 @@ import { MdGroup, MdOutlineAttachFile } from "react-icons/md";
 import { BsTools } from "react-icons/bs";
 import { IoSettingsOutline, IoClose } from "react-icons/io5";
 import { TfiAnnouncement } from "react-icons/tfi";
-import { IoIosSearch } from "react-icons/io";
+import { IoIosSearch, IoIosMenu } from "react-icons/io";
 import { useSelector } from "react-redux";
 import PlaneLogo from "../../public/images/plane.png";
 import { CiPaperplane } from "react-icons/ci";
@@ -12,6 +12,7 @@ import Message from '../components/Message';
 import { messageSuccess } from '../redux/message/messageSlice';
 import { useDispatch } from 'react-redux';
 import { getStorage, getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { HiArrowLeftOnRectangle } from "react-icons/hi2";
 import { app } from "../firebase";
 
 import { io } from "socket.io-client";
@@ -55,8 +56,7 @@ export default function Home() {
   const [messageSearch, setMessageSearch] = useState('');
   const [online, setOnline] = useState(null);
   const [fileType, setFileType] = useState(null);
-  console.log(file);
-  console.log("fileType: ", fileType);
+  const [sideOpen, setSideOpen] = useState(false);
 
   useEffect(() => {
     setSocket(io(ENDPOINT));
@@ -302,7 +302,7 @@ export default function Home() {
   };
 
   const fileTypeDetect = () => {
-    if(file){
+    if (file) {
       const typeFile = file.type;
       console.log("what file: ", typeFile);
 
@@ -312,10 +312,10 @@ export default function Home() {
       } else if (typeFile === 'application/pdf') {
         setFileType('pdf');
       } else if (typeFile === 'application/msword' ||
-                 typeFile === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+        typeFile === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
         setFileType('word');
       } else if (typeFile === 'application/vnd.ms-powerpoint' ||
-                 typeFile === 'application/vnd.openxmlformats-officedocument.presentationml.presentation') {
+        typeFile === 'application/vnd.openxmlformats-officedocument.presentationml.presentation') {
         setFileType('ppt');
       }
     }
@@ -323,8 +323,8 @@ export default function Home() {
 
   return (
     <div className='flex'>
-      <div className="left w-[30%] h-screen flex pl-4">
-        <div className="col1 bg-blue-100 w-[15%] flex flex-col justify-between px-3 py-6 border-l-2 border-r-2 border-gray-400">
+      <div className={`left w-[98%] h-screen flex pl-4 absolute left-0 top-0 z-10 border-r-2 transition-all duration-500 ${sideOpen ? 'left-0' : '-left-[100%]'} sm:w-[60%] md:w-[55%] lg:w-[30%] lg:static lg:pl-0 xl:pl-4`}>
+        <div className="col1 bg-blue-100 w-[20%] flex flex-col justify-between px-2 py-6 border-l-2 border-r-2 border-gray-400 md:w-[15%] md:px-3 lg:px-2 lg:w-[20%] xl:w-[15%]">
           <div className="flex flex-col items-center gap-6 text-gray-600">
             <IoChatboxEllipsesOutline className='text-2xl' />
             <MdGroup className='text-2xl' />
@@ -336,6 +336,7 @@ export default function Home() {
             <Link to='/profile'>
               <img src={currentUser.avatar} alt="" className="w-10 h-10 rounded-full bg-yellow-300 overflow-hidden border border-gray-600" />
             </Link>
+            <HiArrowLeftOnRectangle title='close Sidebar' onClick={()=> setSideOpen(!sideOpen)} className='text-3xl cursor-pointer lg:hidden' />
           </div>
         </div>
         <div className="col2 w-[85%] h-screen bg-white py-4 flex flex-col">
@@ -371,7 +372,7 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <div className="right w-[70%] h-screen border-l-4 border-gray-300 relative">
+      <div className={`right w-full h-screen border-l-4 border-gray-300 relative ${sideOpen? 'opacity-60 bg-gray-200' : ''} lg:w-[70%]`}>
         {!reciverData && (
           <div className="w-full h-screen flex justify-center items-center gap-4">
             <h1 className="text-[3rem] text-gray-500">ChatPlus...</h1>
@@ -395,11 +396,14 @@ export default function Home() {
                   {typing && <p className='text-xs font-semibold text-gray-600 pl-1'>Typing...</p>}
                 </div>
               </div>
-              <button onClick={() => setOpen(true)} className="transition-all duration-300 hover:bg-blue-200 p-2 mr-4 rounded-full"><IoIosSearch className='text-2xl' /></button>
-              <div className={`absolute w-full h-[9vh] bg-blue-50 top-0  transition-all duration-500 ${open ? 'left-0' : 'left-[100%]'} flex items-center justify-between px-6`}>
+              <div className="">
+                <button onClick={() => setOpen(true)} className="transition-all duration-300 hover:bg-blue-200 p-2 mr-4 rounded-full"><IoIosSearch className='text-2xl' /></button>
+                <button onClick={()=> setSideOpen(!sideOpen)} className=''><IoIosMenu className='text-2xl lg:hidden' /></button>
+              </div>
+              <div className={`absolute w-full h-[9vh] bg-blue-50 top-0  transition-all duration-500 ${open ? 'left-0' : 'left-[100%]'} flex items-center justify-between px-4 sm:px-6`}>
                 <input onChange={(e) => setMessageSearch(e.target.value)} type="text" placeholder='Search...' value={messageSearch} className="px-4 py-2 w-[95%] outline-none border rounded-md" />
                 <div className="transition duration-300 hover:bg-blue-100 p-2 rounded-full">
-                  <IoClose onClick={() => { setOpen(false); setMessageSearch('') }} className='text-2xl cursor-pointer' />
+                  <IoClose title='open Sidebar' onClick={() => { setOpen(false); setMessageSearch('') }} className='text-2xl cursor-pointer' />
                 </div>
               </div>
             </div>
@@ -410,15 +414,15 @@ export default function Home() {
                 )
               )}
             </div>
-            <div className="footer bg-blue-100 h-[9vh] px-4 py-2 flex items-center gap-2 border-t-2 border-gray-400 relative">
+            <div className="footer bg-blue-100 h-[9vh] px-2 py-2 flex items-center gap-2 border-t-2 border-gray-400 relative sm:px-4">
               <div className="w-[90%] flex items-center gap-2">
-                <input type="text" onChange={handleInputMessage} placeholder='Type a new message' className="w-[93%] px-4 py-3 rounded-md outline-none" value={message} />
+                <input disabled={sideOpen} type="text" onChange={handleInputMessage} placeholder='Type a new message' className="w-[93%] px-4 py-3 rounded-md outline-none" value={message} />
                 <input ref={fileRef} type="file" onChange={(e) => setFile(e.target.files[0])} hidden />
-                <button onClick={() => fileRef.current.click()} className="p-5 flex justify-center items-center rounded-full transition-all duration-300 hover:bg-gray-300">
-                  <MdOutlineAttachFile className='absolute text-2xl' />
+                <button disabled={sideOpen} onClick={() => fileRef.current.click()} className="p-5 flex justify-center items-center rounded-full transition-all duration-300 hover:bg-gray-300">
+                  <MdOutlineAttachFile className='absolute text-xl sm:text-2xl' />
                 </button>
               </div>
-              <button disabled={(message === '' && fileUploadPercent !== 100) || fileUploadError} onClick={handleMessageSend} className="px-4 py-1 bg-blue-400 text-white rounded-md disabled:bg-blue-300 "><CiPaperplane className='text-4xl' /></button>
+              <button disabled={(message === '' && fileUploadPercent !== 100) || fileUploadError} onClick={handleMessageSend} className="px-3 py-1 bg-blue-400 text-white rounded-md disabled:bg-blue-300 sm:px-4 "><CiPaperplane className='text-3xl sm:4xl' /></button>
               {fileUploadError && <p className="absolute text-red-600 -top-[11px] left-[20px] font-semibold">Error Image Upload(image must be less than 2MB)</p>}
               {(!fileUploadError && file && fileUploadPercent < 100) && <p className="absolute text-green-500 -top-[11px] left-[20px] font-semibold">{`File uploaded ${Math.round(fileUploadPercent)}%`}</p>}
               {(!fileUploadError && file && fileUploadPercent === 100) && <p className="absolute text-green-500 -top-[11px] left-[20px] font-semibold">File is successfully uploaded</p>}

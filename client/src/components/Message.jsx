@@ -66,10 +66,10 @@ export default function Message({ text, sender, createTime, file, url, imgId, ha
     };
 
     return (
-        <div style={{ justifyContent: `${currentUser._id === sender ? 'end' : 'start'}` }} className='my-2 py-2 flex px-12'>
+        <div style={{ justifyContent: `${currentUser._id === sender ? 'end' : 'start'}` }} className='py-2 flex px-6 sm:my-2 sm:px-12'>
             <div style={{ background: `${currentUser._id === sender ? '#5cf39f' : ''}` }} className={`bg-blue-400 inline-block max-w-[55%] p-2 rounded-lg relative ${currentUser._id === sender ? 'rounded-tr-none' : 'rounded-tl-none'}`}>
                 {(file && fileType === 'image') && (
-                    <div className="w-40 h-40 bg-white relative">
+                    <div className="w-36 h-40 bg-white relative sm:w-40">
                         <img src={url} alt="" className="w-full h-full object-contain" />
                         <div className="absolute bottom-0 right-0 flex items-center gap-1">
                             {sender === currentUser._id && (
@@ -80,7 +80,7 @@ export default function Message({ text, sender, createTime, file, url, imgId, ha
                     </div>
                 )}
                 {(file && fileType && fileType !== 'image') && (
-                    <div className="w-40 h-24 bg-white relative">
+                    <div className="w-36 h-24 bg-white relative sm:w-40">
                         <img src={fileType === 'pdf' ? pdfImage : fileType === 'word' ? wordImage : pptImage} alt="" className="w-full h-full object-contain" />
                         <div className="absolute bottom-0 right-0 flex items-center gap-1">
                             {sender === currentUser._id && (
