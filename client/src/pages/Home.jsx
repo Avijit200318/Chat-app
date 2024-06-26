@@ -323,7 +323,7 @@ export default function Home() {
 
   return (
     <div className='flex'>
-      <div className={`left w-[98%] h-screen flex pl-4 absolute left-0 top-0 z-10 border-r-2 transition-all duration-500 ${sideOpen ? 'left-0' : '-left-[100%]'} sm:w-[60%] md:w-[55%] lg:w-[30%] lg:static lg:pl-0 xl:pl-4`}>
+      <div className={`sideleft w-[98%] h-screen flex pl-4 absolute top-0 z-10 border-r-2 transition-all duration-500 ${(sideOpen || reciverId === null)? 'left-0' : '-left-[100%]'} sm:w-[60%] md:w-[55%] lg:w-[30%] lg:static lg:pl-0 xl:pl-4`}>
         <div className="col1 bg-blue-100 w-[20%] flex flex-col justify-between px-2 py-6 border-l-2 border-r-2 border-gray-400 md:w-[15%] md:px-3 lg:px-2 lg:w-[20%] xl:w-[15%]">
           <div className="flex flex-col items-center gap-6 text-gray-600">
             <IoChatboxEllipsesOutline className='text-2xl' />
@@ -336,7 +336,9 @@ export default function Home() {
             <Link to='/profile'>
               <img src={currentUser.avatar} alt="" className="w-10 h-10 rounded-full bg-yellow-300 overflow-hidden border border-gray-600" />
             </Link>
-            <HiArrowLeftOnRectangle title='close Sidebar' onClick={()=> setSideOpen(!sideOpen)} className='text-3xl cursor-pointer lg:hidden' />
+            <button onClick={()=> setSideOpen(!sideOpen)} className="lg:hidden hover:bg-blue-100 p-1">
+            <HiArrowLeftOnRectangle className='text-3xl' />
+            </button>
           </div>
         </div>
         <div className="col2 w-[85%] h-screen bg-white py-4 flex flex-col">
@@ -372,11 +374,11 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <div className={`right w-full h-screen border-l-4 border-gray-300 relative ${sideOpen? 'opacity-60 bg-gray-200' : ''} lg:w-[70%]`}>
+      <div className={`sideright w-full h-screen border-l-4 border-gray-300 relative ${sideOpen? 'opacity-60 bg-gray-200' : ''} lg:w-[70%]`}>
         {!reciverData && (
           <div className="w-full h-screen flex justify-center items-center gap-4">
-            <h1 className="text-[3rem] text-gray-500">ChatPlus...</h1>
-            <img src={PlaneLogo} alt="" className="w-48 h-48 opacity-50" />
+            <h1 className="text-4xl text-gray-500 sm:text-[3rem[">ChatPlus...</h1>
+            <img src={PlaneLogo} alt="" className="w-32 h-32 opacity-50 sm:w-48 sm:h-48" />
           </div>
         )}
         {loading && (

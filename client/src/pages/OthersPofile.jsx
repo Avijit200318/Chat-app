@@ -61,25 +61,25 @@ export default function OthersPofile() {
     return (
         <div>
             {loading && (
-                <div className="w-full h-full absolute left-0 top-0 flex justify-center items-center bg-[#0197ff]">
+                <div className="w-full h-full absolute left-0 top-0 flex justify-center items-center bg-[#0197ff] z-50">
                     <div className="h-24 w-24 border-8 border-t-white border-gray-300 rounded-full animate-spin"></div>
                 </div>
             )}
             {(!loading && userData) && (
-            <div className='w-full h-screen bg-blue-100 py-6 px-4'>
+            <div className='w-full h-screen bg-blue-100 py-6 px-2 sm:px-4'>
                 <div className="w-full px-4">
                     <Link to='/'><FaArrowLeftLong className='text-2xl' /></Link>
                 </div>
                 <h1 className="text-3xl text-center py-4">Profile</h1>
-                <div className="flex flex-col justify-center items-center py-4 border-2 border-white relative w-[35%] mx-auto rounded-md">
+                <div className="flex flex-col justify-center items-center py-4 border-2 border-white relative w-full mx-auto rounded-md sm:w-[70%] lg:w-[55%] xl:w-[35%]">
                     <div className="absolute w-full h-1/2 bg-blue-50 bottom-0 left-0 z-10"></div>
                     <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white z-20">
                         <img src={userData.avatar} alt="" className="w-full h-full object-cover" />
                     </div>
 
                 </div>
-                <div className="flex justify-center border px-4">
-                    <div className="border-4 border-blue-50 w-[36%] flex flex-col gap-4 p-4 rounded-md">
+                <div className="flex justify-center border xl:px-4">
+                    <div className="border-4 border-blue-50 w-full flex flex-col gap-4 p-4 rounded-md sm:w-[70%] lg:w-[55%] xl:w-[36%]">
                         <input type="text" placeholder='Username' id='username' className="px-4 py-3 border border-black rounded-md outline-none" autoComplete='off' value={userData.username} />
                         <input type="email" placeholder='email' id='email' className="px-4 py-3 border border-black rounded-md outline-none" autoComplete='off' value={userData.email} />
                         <input type="text" placeholder='status' id='status' className="px-4 py-3 border border-black rounded-md outline-none" autoComplete='off' value={userData.status} />

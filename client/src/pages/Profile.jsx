@@ -107,30 +107,30 @@ export default function Profile() {
     };
 
     return (
-        <div className='w-full h-screen bg-blue-100 py-6 px-4'>
+        <div className='w-full h-screen bg-blue-100 py-6 px-2 sm:px-4'>
             <div className="w-full px-4">
                 <Link to='/'><FaArrowLeftLong className='text-2xl' /></Link>
             </div>
-            <h1 className="text-3xl text-center">Profile</h1>
-            <div className="flex flex-col justify-center items-center py-4 border-2 border-white relative w-[35%] mx-auto rounded-md">
+            <h1 className="text-2xl text-center sm:text-3xl">Profile</h1>
+            <div className="flex flex-col justify-center items-center py-4 border-2 border-white relative w-full mx-auto rounded-md sm:w-[70%] lg:w-[60%] xl:w-[35%]">
                 <div className="absolute w-full h-1/2 bg-blue-50 bottom-0 left-0 z-10"></div>
                 <div onClick={() => fileRef.current.click()} className="w-28 h-28 rounded-full overflow-hidden border-4 border-white cursor-pointer z-20">
                     <img src={formData.avatar || currentUser.avatar} alt="" className="w-full h-full object-cover" />
                 </div>
-                {fileUploadError && <p className="text-sm font-semibold text-red-500">Error Image Upload(image must be less than 2MB)</p>}
+                {fileUploadError && <p className="text-sm font-semibold text-red-500 z-20">Error Image Upload(image must be less than 2MB)</p>}
                 {
-                    (!fileUploadError && fileUploadPercent !== 0 && fileUploadPercent < 100) && <p className="text-sm font-semibold text-green-500">{`Uploaded file ${fileUploadPercent}%`}</p>
+                    (!fileUploadError && fileUploadPercent !== 0 && fileUploadPercent < 100) && <p className="text-sm font-semibold text-green-500 z-20">{`Uploaded file ${fileUploadPercent}%`}</p>
                 }
                 {
-                    (!fileUploadError && fileUploadPercent === 100) && <p className="text-sm font-semibold text-green-500">File Uploaded Successfully</p>
+                    (!fileUploadError && fileUploadPercent === 100) && <p className="text-sm font-semibold text-green-500 z-20">File Uploaded Successfully</p>
                 }
 
-                {error && <p className="text-red-600 font-semibold text-center">{error}</p>}
+                {error && <p className="text-red-600 font-semibold text-center z-20">{error}</p>}
 
-                {(!error && updateSuccess) && <p className="text-green-500 font-semibold text-center">Profile Updated successfully</p>}
+                {(!error && updateSuccess) && <p className="text-green-500 font-semibold text-center z-20">Profile Updated successfully</p>}
             </div>
-            <div className="flex justify-center border px-4">
-                <form onSubmit={handleSubmit} className="border-4 border-blue-50 w-[36%] flex flex-col gap-4 p-4 rounded-md">
+            <div className="flex justify-center border xl:px-4">
+                <form onSubmit={handleSubmit} className="border-4 border-blue-50 w-full flex flex-col gap-4 p-4 rounded-md sm:w-[70%] lg:w-[60%] xl:w-[36%]">
                     <input ref={fileRef} onChange={(e) => setFile(e.target.files[0])} type="file" hidden accept='image/*' />
                     <input type="text" onChange={handleInputChange} placeholder='Username' id='username' className="px-4 py-3 border border-black rounded-md outline-none" autoComplete='off' defaultValue={currentUser.username} />
                     <input type="email" onChange={handleInputChange} placeholder='email' id='email' className="px-4 py-3 border border-black rounded-md outline-none" autoComplete='off' defaultValue={currentUser.email} />
