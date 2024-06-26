@@ -322,7 +322,7 @@ export default function Home() {
   };
 
   return (
-    <main className='flex w-full Dheight'>
+    <main className='flex w-full'>
       <div className={`sideleft w-[98%] Dheight flex pl-4 absolute top-0 z-10 border-r-2 transition-all duration-500 ${(sideOpen || reciverId === null)? 'left-0' : '-left-[100%]'} sm:w-[60%] md:w-[55%] lg:w-[30%] lg:static lg:pl-0 xl:pl-4`}>
         <div className="col1 bg-blue-100 w-[20%] flex flex-col justify-between px-2 py-6 border-l-2 border-r-2 border-gray-400 md:w-[15%] md:px-3 lg:px-2 lg:w-[20%] xl:w-[15%]">
           <div className="flex flex-col items-center gap-6 text-gray-600">
@@ -387,7 +387,7 @@ export default function Home() {
           </div>
         )}
         {reciverData && (
-          <div>
+          <div className='Dheight w-auto'>
             <div className="header bg-blue-50 h-[9vh] px-4 py-2 border-b-2 shadow-md flex justify-between items-center relative overflow-hidden">
               <div className="flex items-center gap-4">
                 <Link to={`/userProfile/${reciverData._id}`}>
