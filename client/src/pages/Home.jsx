@@ -18,7 +18,7 @@ import { app } from "../firebase";
 import { io } from "socket.io-client";
 import { Link } from 'react-router-dom';
 
-const ENDPOINT = 'https://mern-chatplus.onrender.com/';
+const ENDPOINT ='https://mern-chatplus.onrender.com/';
 let socket;
 
 export default function Home() {
@@ -341,7 +341,7 @@ export default function Home() {
             </button>
           </div>
         </div>
-        <div className="col2 w-[85%] h-screen bg-white py-4 flex flex-col">
+        <div className="col2 w-[85%] Dheight bg-white py-4 flex flex-col">
           <div className="border-b border-gray-400 px-2">
             <h1 className="text-2xl font-semibold px-4">Chats...</h1>
             {room && <p className="text-xs sm:px-4 sm:text-sm">room: {room._id}</p>}
