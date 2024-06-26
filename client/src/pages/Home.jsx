@@ -323,7 +323,7 @@ export default function Home() {
 
   return (
     <main className='flex w-full'>
-      <div className={`sideleft w-[98%] Dheight flex pl-4 absolute top-0 z-10 border-r-2 transition-all duration-500 ${(sideOpen || reciverId === null)? 'left-0' : '-left-[100%]'} sm:w-[60%] md:w-[55%] lg:w-[30%] lg:static lg:pl-0 xl:pl-4`}>
+      <div className={`sideleft w-[98%] Dheight bg-white flex pl-4 absolute top-0 z-10 border-r-2 transition-all duration-500 ${(sideOpen || reciverId === null)? 'left-0' : '-left-[100%]'} sm:w-[60%] md:w-[55%] lg:w-[30%] lg:static lg:pl-0 xl:pl-4`}>
         <div className="col1 bg-blue-100 w-[20%] flex flex-col justify-between px-2 py-6 border-l-2 border-r-2 border-gray-400 md:w-[15%] md:px-3 lg:px-2 lg:w-[20%] xl:w-[15%]">
           <div className="flex flex-col items-center gap-6 text-gray-600">
             <IoChatboxEllipsesOutline className='text-2xl' />
@@ -348,7 +348,7 @@ export default function Home() {
 
             <form onSubmit={handleSearchUser} className="border border-black flex my-4 overflow-hidden rounded-full bg-blue-50">
               <input type="text" onChange={(e) => setSearchText(e.target.value)} value={searchText} placeholder='Search username or email' className="px-4 py-2 w-[85%] outline-none bg-transparent placeholder:truncate" />
-              <button className='py-2 px-4 text-2xl w-[15%]'><IoIosSearch /></button>
+              <button className='py-2 px-2 text-2xl w-[15%] flex justify-center 2xl:px-4'><IoIosSearch /></button>
             </form>
           </div>
           <div className='overflow-y-auto scrollbar-custom'>
@@ -388,7 +388,7 @@ export default function Home() {
         )}
         {reciverData && (
           <div className='Dheight w-auto'>
-            <div className="header bg-blue-50 h-[9vh] px-4 py-2 border-b-2 shadow-md flex justify-between items-center relative overflow-hidden">
+            <div className="header bg-blue-50 h-[9svh] px-4 py-2 border-b-2 shadow-md flex justify-between items-center relative overflow-hidden">
               <div className="flex items-center gap-4">
                 <Link to={`/userProfile/${reciverData._id}`}>
                   <img src={reciverData.avatar} alt="" className="h-12 w-12 rounded-full overflow-hidden bg-yellow-300" />
@@ -402,21 +402,21 @@ export default function Home() {
                 <button onClick={() => setOpen(true)} className="transition-all duration-300 hover:bg-blue-200 p-2 mr-4 rounded-full"><IoIosSearch className='text-2xl' /></button>
                 <button onClick={()=> setSideOpen(!sideOpen)} className=''><IoIosMenu className='text-2xl lg:hidden' /></button>
               </div>
-              <div className={`absolute w-full h-[9vh] bg-blue-50 top-0  transition-all duration-500 ${open ? 'left-0' : 'left-[100%]'} flex items-center justify-between px-4 sm:px-6`}>
+              <div className={`absolute w-full h-[9svh] bg-blue-50 top-0  transition-all duration-500 ${open ? 'left-0' : 'left-[100%]'} flex items-center justify-between px-4 sm:px-6`}>
                 <input onChange={(e) => setMessageSearch(e.target.value)} type="text" placeholder='Search...' value={messageSearch} className="px-4 py-2 w-[95%] outline-none border rounded-md" />
                 <div className="transition duration-300 hover:bg-blue-100 p-2 rounded-full">
                   <IoClose title='open Sidebar' onClick={() => { setOpen(false); setMessageSearch('') }} className='text-2xl cursor-pointer' />
                 </div>
               </div>
             </div>
-            <div ref={divRef} className="chatBox w-full h-[82vh] overflow-y-auto scrollbar-custom">
+            <div ref={divRef} className="chatBox w-full h-[82svh] overflow-y-auto scrollbar-custom">
               {allMessages.length > 0 && (
                 allMessages.filter((mssg) => mssg.text.includes(messageSearch)).map((msg) =>
                   <Message key={msg._id} text={msg.text} sender={msg.sender} createTime={msg.createdAt} file={msg.file} url={msg.url} imgId={msg._id} handleDeleteImage={handleDeleteImage} fileType={msg.fileType} />
                 )
               )}
             </div>
-            <div className="footer bg-blue-100 h-[9vh] px-2 py-2 flex items-center gap-2 border-t-2 border-gray-400 relative sm:px-4">
+            <div className="footer bg-blue-100 h-[9svh] px-2 py-2 flex items-center gap-2 border-t-2 border-gray-400 relative sm:px-4">
               <div className="w-[90%] flex items-center gap-2">
                 <input disabled={sideOpen} type="text" onChange={handleInputMessage} placeholder='Type a new message' className="w-[93%] px-4 py-3 rounded-md outline-none" value={message} />
                 <input ref={fileRef} type="file" onChange={(e) => setFile(e.target.files[0])} hidden />
