@@ -18,7 +18,7 @@ import { app } from "../firebase";
 import { io } from "socket.io-client";
 import { Link } from 'react-router-dom';
 
-const ENDPOINT = 'http://localhost:3000';
+const ENDPOINT = 'https://mern-chatplus.onrender.com/';
 let socket;
 
 export default function Home() {
