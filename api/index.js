@@ -11,13 +11,17 @@ import cors from "cors";
 import { Server } from "socket.io";
 import { sockets } from "./socket/socket.js";
 
+import path from "path";
+
 dotenv.config();
 
 mongoose.connect(process.env.MONGO).then(() => {
     console.log("mongodb is connected");
 }).catch((error) => {
     console.log(error);
-})
+});
+
+const __dirname = path.resolve();
 
 const app = express();
 
@@ -46,6 +50,12 @@ server.listen(3000, () => {
 app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/message", messageRouter);
+
+app.use(express.static(path.join(__dirname, '/client/dist')));
+
+app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
+})
 
 app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500;

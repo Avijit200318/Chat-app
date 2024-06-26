@@ -45,7 +45,7 @@ ChatPlus is a real-time chat application built using the MERN stack (MongoDB, Ex
 
 - **Socket Io:** Enables real-time, bidirectional communication between clients and servers, ensuring instant message delivery and live updates.
 
-## Using ChatPlus
+## Usage
 
 ChatPlus offers a straightforward and enjoyable experience for communicating and sharing files with others. Follow these steps to make the most out of your chat experience:
 
