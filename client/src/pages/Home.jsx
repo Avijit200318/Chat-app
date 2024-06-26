@@ -38,7 +38,6 @@ export default function Home() {
   const [allMessages, setAllMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  // console.log(allMessages);
   const [room, setRoom] = useState(null);
   const divRef = useRef(null);
   const dispatch = useDispatch();
@@ -57,6 +56,7 @@ export default function Home() {
   const [online, setOnline] = useState(null);
   const [fileType, setFileType] = useState(null);
   const [sideOpen, setSideOpen] = useState(false);
+  console.log("onlineUsers: ", online);
 
   useEffect(() => {
     setSocket(io(ENDPOINT));
@@ -322,8 +322,8 @@ export default function Home() {
   };
 
   return (
-    <div className='flex'>
-      <div className={`sideleft w-[98%] h-screen flex pl-4 absolute top-0 z-10 border-r-2 transition-all duration-500 ${(sideOpen || reciverId === null)? 'left-0' : '-left-[100%]'} sm:w-[60%] md:w-[55%] lg:w-[30%] lg:static lg:pl-0 xl:pl-4`}>
+    <main className='flex w-full Dheight'>
+      <div className={`sideleft w-[98%] Dheight flex pl-4 absolute top-0 z-10 border-r-2 transition-all duration-500 ${(sideOpen || reciverId === null)? 'left-0' : '-left-[100%]'} sm:w-[60%] md:w-[55%] lg:w-[30%] lg:static lg:pl-0 xl:pl-4`}>
         <div className="col1 bg-blue-100 w-[20%] flex flex-col justify-between px-2 py-6 border-l-2 border-r-2 border-gray-400 md:w-[15%] md:px-3 lg:px-2 lg:w-[20%] xl:w-[15%]">
           <div className="flex flex-col items-center gap-6 text-gray-600">
             <IoChatboxEllipsesOutline className='text-2xl' />
@@ -357,7 +357,7 @@ export default function Home() {
                 (user._id !== currentUser._id) && (
                   <div key={index} style={{ background: `${user._id === reciverId ? 'rgb(220, 235, 255)' : ''}` }} onClick={() => handleSetReciverid(user._id)} className="flex items-center gap-6 py-2 border-b border-gray-500 transition-all duration-300 hover:bg-blue-100 cursor-pointer px-2">
                     <div style={{ border: `${(online && online.some((obj) => Object.values(obj).includes(user._id))) ? '3px solid yellow' : ''}` }} className="w-auto h-auto relative bg-yellow-500 rounded-full">
-                      <img src={user.avatar} alt="" className="w-10 h-10 rounded-full bg-blue-200 border border-gray-400" />
+                      <img src={user.avatar} alt="" className="w-10 h-10 rounded-full bg-blue-200 border" />
                       {(online && online.some((obj) => Object.values(obj).includes(user._id))) && (
                         <div className="onlineFinder absolute w-4 h-4 bg-[#fdfd00] rounded-full bottom-0 right-0"></div>
                       )}
@@ -374,7 +374,7 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <div className={`sideright w-full h-screen border-l-4 border-gray-300 relative ${sideOpen? 'opacity-60 bg-gray-200' : ''} lg:w-[70%]`}>
+      <div className={`sideright w-full Dheight border-l-4 border-gray-300 relative ${sideOpen? 'opacity-60 bg-gray-200' : ''} lg:w-[70%]`}>
         {!reciverData && (
           <div className="w-full h-screen flex justify-center items-center gap-4">
             <h1 className="text-4xl text-gray-500 sm:text-[3rem[">ChatPlus...</h1>
@@ -432,6 +432,6 @@ export default function Home() {
           </div>
         )}
       </div>
-    </div>
+    </main>
   )
 }

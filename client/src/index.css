@@ -27,4 +27,8 @@
     .scrollbar-custom::-webkit-scrollbar-thumb:hover {
       background: #555;
     }
+
+    .Dheight {
+      height: 100svh;
+    }
   }

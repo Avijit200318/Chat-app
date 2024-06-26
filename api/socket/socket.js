@@ -3,13 +3,10 @@ export const sockets = (socket) => {
     console.log("connected to socket io");
 
     socket.on('register', ({user}) => {
-        const isRegistered = connectedUsers.some((obj) => Object.values(obj).includes(user._id));
-        if(!isRegistered){
             connectedUsers.push({[socket.id]: user._id});
             socket.emit('user-online', {connectedUsers});
             socket.broadcast.emit('user-online', {connectedUsers});
             // console.log("registerd user:", connectedUsers);
-        }
     })
 
 
