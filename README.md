@@ -1,6 +1,6 @@
 ## ChatPlus
 
-**Live Link** 
+**Live Link:** https://mern-chatplus.onrender.com
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
