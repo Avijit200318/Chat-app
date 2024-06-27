@@ -33,14 +33,15 @@ export default function Message({ text, sender, createTime, file, url, imgId, ha
             if (!response.ok) throw new Error('Network response was not ok');
 
             const blob = await response.blob();
-            if (fileType === 'image') {
-                saveAs(blob, `${fileName}.jpg`);
-            }else if(fileType === 'pdf'){
+                
+            if(fileType === 'pdf'){
                 saveAs(blob,`${fileName}.pdf`);
             }else if(fileType === 'word'){
                 saveAs(blob, `${fileName}.docx`);
             }else if(fileType === 'ppt'){
                 saveAs(blob, `${fileName}.pptx`);
+            }else{
+                saveAs(blob, `${fileName}.jpg`);
             }
         } catch (error) {
             console.error('Error downloading the image', error);
@@ -67,7 +68,7 @@ export default function Message({ text, sender, createTime, file, url, imgId, ha
 
     return (
         <div style={{ justifyContent: `${currentUser._id === sender ? 'end' : 'start'}` }} className='py-2 flex px-6 sm:my-2 sm:px-12'>
-            <div style={{ background: `${currentUser._id === sender ? '#5cf39f' : ''}` }} className={`bg-blue-400 inline-block max-w-[55%] p-2 rounded-lg relative ${currentUser._id === sender ? 'rounded-tr-none' : 'rounded-tl-none'}`}>
+            <div style={{ background: `${currentUser._id === sender ? 'rgb(242, 242, 138)' : ''}` }} className={`bg-[#EBCCFF] inline-block max-w-[55%] p-2 rounded-xl relative ${currentUser._id === sender ? 'rounded-tr-none' : 'rounded-tl-none'}`}>
                 {(file && fileType === 'image') && (
                     <div className="w-36 h-40 bg-white relative sm:w-40">
                         <img src={url} alt="" className="w-full h-full object-contain" />

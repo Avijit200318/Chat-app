@@ -56,7 +56,7 @@ export default function Home() {
   const [online, setOnline] = useState(null);
   const [fileType, setFileType] = useState(null);
   const [sideOpen, setSideOpen] = useState(false);
-  console.log("onlineUsers: ", online);
+  console.log(message);
 
   useEffect(() => {
     setSocket(io(ENDPOINT));
@@ -218,6 +218,7 @@ export default function Home() {
       if (room) {
         socket.emit('leave-room', { roomId: room._id });
       }
+      setSideOpen(false);
     }
   };
 
@@ -324,7 +325,7 @@ export default function Home() {
   return (
     <main className='flex w-full'>
       <div className={`sideleft w-[98%] Dheight bg-white flex pl-4 absolute top-0 z-10 border-r-2 transition-all duration-500 ${(sideOpen || reciverId === null)? 'left-0' : '-left-[100%]'} sm:w-[60%] md:w-[55%] lg:w-[30%] lg:static lg:pl-0 xl:pl-4`}>
-        <div className="col1 bg-blue-100 w-[20%] flex flex-col justify-between px-2 py-6 border-l-2 border-r-2 border-gray-400 md:w-[15%] md:px-3 lg:px-2 lg:w-[20%] xl:w-[15%]">
+        <div className="col1 bg-blue-100 w-[20%] flex flex-col justify-between px-2 py-6 border-l border-r-2 border-gray-400 md:w-[15%] md:px-3 lg:px-2 lg:w-[20%] xl:w-[15%]">
           <div className="flex flex-col items-center gap-6 text-gray-600">
             <IoChatboxEllipsesOutline className='text-2xl' />
             <MdGroup className='text-2xl' />
@@ -355,16 +356,16 @@ export default function Home() {
             {allUsers && (
               allUsers.map((user, index) => (
                 (user._id !== currentUser._id) && (
-                  <div key={index} style={{ background: `${user._id === reciverId ? 'rgb(220, 235, 255)' : ''}` }} onClick={() => handleSetReciverid(user._id)} className="flex items-center gap-6 py-2 border-b border-gray-500 transition-all duration-300 hover:bg-blue-100 cursor-pointer px-2">
+                  <div key={index} style={{ background: `${user._id === reciverId ? 'rgb(245, 234, 255)' : ''}` }} onClick={() => handleSetReciverid(user._id)} className="flex items-center gap-6 py-2 border-b border-gray-500 transition-all duration-300 hover:bg-blue-50 cursor-pointer px-2">
                     <div style={{ border: `${(online && online.some((obj) => Object.values(obj).includes(user._id))) ? '3px solid yellow' : ''}` }} className="w-auto h-auto relative bg-yellow-500 rounded-full">
                       <img src={user.avatar} alt="" className="w-10 h-10 rounded-full bg-blue-200 border" />
                       {(online && online.some((obj) => Object.values(obj).includes(user._id))) && (
                         <div className="onlineFinder absolute w-4 h-4 bg-[#fdfd00] rounded-full bottom-0 right-0"></div>
                       )}
                     </div>
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-1">
                       <h1 className="text-lg truncate">{user.username}</h1>
-                      <p className="text-xs text-gray-500 font-semibold">{user.status}</p>
+                      <p className="text-xs text-gray-500 sm:font-semibold">{user.status}</p>
                     </div>
                   </div>
                 )
@@ -388,7 +389,7 @@ export default function Home() {
         )}
         {reciverData && (
           <div className='Dheight w-auto'>
-            <div className="header bg-blue-50 h-[9svh] px-4 py-2 border-b-2 shadow-md flex justify-between items-center relative overflow-hidden">
+            <div className="header bg-blue-50 h-[9svh] px-4 py-2 border-b-2 shadow-md flex justify-between items-center relative overflow-hidden z-10">
               <div className="flex items-center gap-4">
                 <Link to={`/userProfile/${reciverData._id}`}>
                   <img src={reciverData.avatar} alt="" className="h-12 w-12 rounded-full overflow-hidden bg-yellow-300" />
@@ -409,7 +410,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <div ref={divRef} className="chatBox w-full h-[82svh] overflow-y-auto scrollbar-custom">
+            <div ref={divRef} className="chatBox w-full h-[82svh] overflow-y-auto scrollbar-custom bg-[#FDFFE2]">
               {allMessages.length > 0 && (
                 allMessages.filter((mssg) => mssg.text.includes(messageSearch)).map((msg) =>
                   <Message key={msg._id} text={msg.text} sender={msg.sender} createTime={msg.createdAt} file={msg.file} url={msg.url} imgId={msg._id} handleDeleteImage={handleDeleteImage} fileType={msg.fileType} />
