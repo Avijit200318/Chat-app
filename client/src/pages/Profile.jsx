@@ -6,6 +6,7 @@ import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/
 import { app } from "../firebase";
 import { useDispatch } from 'react-redux';
 import { updateUserStart, updateUserFailure, updateUserSuccess, signOutSuccess, signOutFailure, signOutStart, deleteUserFailure, deleteUserStart, deleteUserSuccess } from '../redux/user/userSlice';
+import Emoji from '../components/Emoji';
 
 export default function Profile() {
     const { currentUser, error, loading } = useSelector((state) => state.user);
@@ -130,6 +131,7 @@ export default function Profile() {
                 {(!error && updateSuccess) && <p className="text-green-500 font-semibold text-center z-20">Profile Updated successfully</p>}
             </div>
             <div className="flex justify-center border xl:px-4">
+                <Emoji />
                 <form onSubmit={handleSubmit} className="border-4 border-blue-50 w-full flex flex-col gap-4 p-4 rounded-md sm:w-[70%] lg:w-[60%] xl:w-[36%]">
                     <input ref={fileRef} onChange={(e) => setFile(e.target.files[0])} type="file" hidden accept='image/*' />
                     <input type="text" onChange={handleInputChange} placeholder='Username' id='username' className="px-4 py-3 border border-black rounded-md outline-none" autoComplete='off' defaultValue={currentUser.username} />

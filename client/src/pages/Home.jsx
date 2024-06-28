@@ -17,8 +17,9 @@ import { app } from "../firebase";
 
 import { io } from "socket.io-client";
 import { Link } from 'react-router-dom';
+import Emoji from '../components/Emoji';
 
-const ENDPOINT ='https://mern-chatplus.onrender.com/';
+const ENDPOINT = 'https://mern-chatplus.onrender.com/';
 let socket;
 
 export default function Home() {
@@ -56,7 +57,6 @@ export default function Home() {
   const [online, setOnline] = useState(null);
   const [fileType, setFileType] = useState(null);
   const [sideOpen, setSideOpen] = useState(false);
-  console.log(message);
 
   useEffect(() => {
     setSocket(io(ENDPOINT));
@@ -395,7 +395,7 @@ export default function Home() {
                   <img src={reciverData.avatar} alt="" className="h-12 w-12 rounded-full overflow-hidden bg-yellow-300" />
                 </Link>
                 <div className="">
-                  <h1 className="text-lg">{reciverData.username}</h1>
+                  <h1 className="text-lg truncate">{reciverData.username}</h1>
                   {typing && <p className='text-xs font-semibold text-gray-600 pl-1'>Typing...</p>}
                 </div>
               </div>
@@ -421,6 +421,7 @@ export default function Home() {
               <div className="w-[90%] flex items-center gap-2">
                 <input disabled={sideOpen} type="text" onChange={handleInputMessage} placeholder='Type a new message' className="w-[93%] px-4 py-3 rounded-md outline-none" value={message} />
                 <input ref={fileRef} type="file" onChange={(e) => setFile(e.target.files[0])} hidden />
+                <Emoji setMessage={setMessage} />
                 <button disabled={sideOpen} onClick={() => fileRef.current.click()} className="p-5 flex justify-center items-center rounded-full transition-all duration-300 hover:bg-gray-300">
                   <MdOutlineAttachFile className='absolute text-xl sm:text-2xl' />
                 </button>

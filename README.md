@@ -4,7 +4,7 @@
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-![image](https://github.com/Avijit200318/Chat-app/assets/136997678/1eb4aa32-4473-484c-818d-d416ab5f1d23)
+![image](https://github.com/Avijit200318/Chat-app/assets/136997678/9d685e82-04a6-4487-9456-799e4e9882c7)
 
 
 ## Overview
