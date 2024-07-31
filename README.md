@@ -31,6 +31,9 @@ ChatPlus is a real-time chat application built using the MERN stack (MongoDB, Ex
 - **Responsive Design:** A clean, intuitive, and responsive user interface built with React, providing a seamless experience across all devices.
 
 - **Typing Indicators:** See when other users are typing a message, adding to the real-time communication experience.
+- **PWA:**
+  ![image](https://github.com/user-attachments/assets/3a043753-fa94-4122-9201-eb1b731ed2da)
+
 
 
 ## Technologies Used
