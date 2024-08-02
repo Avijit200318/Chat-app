@@ -49,20 +49,6 @@ export default defineConfig({
         theme_color: '#fff',
         background_color: '#fff'
       },
-      workbox: {
-        runtimeCaching: [{
-          urlPattern: ({ url }) => {
-            return url.pathname.startsWith("/api");
-          },
-          handler: "CacheFirst",
-          options: {
-            cacheName: "api-cache",
-            cacheableResponse: {
-              statuses: [0, 200]
-            }
-          }
-        }]
-      },
       registerType: 'autoUpdate'
     })
   ],
