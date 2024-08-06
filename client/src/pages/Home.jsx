@@ -378,9 +378,9 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <div className={`sideright w-full Dheight border-l-4 border-gray-300 relative ${sideOpen ? 'opacity-60 bg-gray-200' : ''} lg:w-[70%]`}>
+      <div className={`sideright w-full h-[100svh] border-l-4 border-gray-300 relative ${sideOpen ? 'opacity-60 bg-gray-200' : ''} lg:w-[70%]`}>
         {!reciverData && (
-          <div className="w-full Dheight flex justify-center items-center gap-4">
+          <div className="w-full h-[100svh] flex justify-center items-center gap-4">
             <h1 className="text-4xl text-gray-500 sm:text-[3rem[">ChatPlus...</h1>
             <img src={PlaneLogo} alt="" className="w-32 h-32 opacity-50 sm:w-48 sm:h-48" />
           </div>
