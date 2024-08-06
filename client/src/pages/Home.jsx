@@ -324,7 +324,7 @@ export default function Home() {
 
   return (
     <main className='flex w-full'>
-      <div className={`sideleft w-[98%] bg-white flex pl-4 absolute top-0 z-10 border-r-2 transition-all duration-500 ${(sideOpen || reciverId === null) ? 'left-0' : '-left-[100%]'} sm:w-[60%] md:w-[55%] lg:w-[30%] lg:static lg:pl-0 xl:pl-4`}>
+      <div className={`sideleft w-[98%] bg-white flex pl-4 absolute top-0 z-10 border-r-2 border-t border-gray-400 transition-all duration-500 ${(sideOpen || reciverId === null) ? 'left-0' : '-left-[100%]'} sm:w-[60%] md:w-[55%] lg:w-[30%] lg:static lg:pl-0 xl:pl-4`}>
         <div className="col1 bg-blue-100 w-[20%] Dheight flex flex-col justify-between px-2 py-6 border-l border-r-2 border-gray-400 md:w-[15%] md:px-3 lg:px-2 lg:w-[20%] xl:w-[15%]">
           <div className="flex flex-col items-center gap-6 text-gray-600">
             <IoChatboxEllipsesOutline className='text-2xl' />
