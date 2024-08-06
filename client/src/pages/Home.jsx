@@ -324,63 +324,60 @@ export default function Home() {
 
   return (
     <main className='flex w-full'>
-      <div className={`sideleft w-[98%] bg-white pl-4 absolute top-0 z-10 border-r-2 transition-all duration-500 ${(sideOpen || reciverId === null) ? 'left-0' : '-left-[100%]'} sm:w-[60%] md:w-[55%] lg:w-[30%] lg:static lg:pl-0 xl:pl-4`}>
-        <div className="header w-full h-[9svh] bg-[#dbeafe] border-l border-b border-gray-400 lg:hidden"></div>
-        <div className="w-full flex h-[91svh] lg:h-[100svh]">
-          <div className="col1 bg-blue-100 w-[20%] h-full flex flex-col justify-between px-2 py-6 border-l border-r-2 border-gray-400 md:w-[15%] md:px-3 lg:px-2 lg:w-[20%] xl:w-[15%]">
-            <div className="flex flex-col items-center gap-6 text-gray-600">
-              <IoChatboxEllipsesOutline className='text-2xl' />
-              <MdGroup className='text-2xl' />
-              <BsTools className='text-2xl' />
-              <TfiAnnouncement className='text-2xl' />
-            </div>
-            <div className="flex flex-col items-center gap-6 text-gray-600">
-              <IoSettingsOutline className='text-3xl' />
-              <Link to='/profile'>
-                <img src={currentUser.avatar} alt="" className="w-10 h-10 rounded-full bg-yellow-300 overflow-hidden border border-gray-600" />
-              </Link>
-              <button onClick={() => setSideOpen(!sideOpen)} className="lg:hidden hover:bg-blue-100 p-1">
-                <HiArrowLeftOnRectangle className='text-3xl' />
-              </button>
-            </div>
+      <div className={`sideleft w-[98%] bg-white flex pl-4 absolute top-0 z-10 border-r-2 transition-all duration-500 ${(sideOpen || reciverId === null) ? 'left-0' : '-left-[100%]'} sm:w-[60%] md:w-[55%] lg:w-[30%] lg:static lg:pl-0 xl:pl-4`}>
+        <div className="col1 bg-blue-100 w-[20%] Dheight flex flex-col justify-between px-2 py-6 border-l border-r-2 border-gray-400 md:w-[15%] md:px-3 lg:px-2 lg:w-[20%] xl:w-[15%]">
+          <div className="flex flex-col items-center gap-6 text-gray-600">
+            <IoChatboxEllipsesOutline className='text-2xl' />
+            <MdGroup className='text-2xl' />
+            <BsTools className='text-2xl' />
+            <TfiAnnouncement className='text-2xl' />
           </div>
-          <div className="col2 w-[85%] Dheight lg:h-[100svh] bg-white py-4 flex flex-col">
-            <div className="border-b border-gray-400 px-2">
-              <h1 className="text-2xl font-semibold px-4">Chats...</h1>
-              {room && <p className="text-xs sm:px-4 sm:text-sm">room: {room._id}</p>}
+          <div className="flex flex-col items-center gap-6 text-gray-600">
+            <IoSettingsOutline className='text-3xl' />
+            <Link to='/profile'>
+              <img src={currentUser.avatar} alt="" className="w-10 h-10 rounded-full bg-yellow-300 overflow-hidden border border-gray-600" />
+            </Link>
+            <button onClick={() => setSideOpen(!sideOpen)} className="lg:hidden hover:bg-blue-100 p-1">
+              <HiArrowLeftOnRectangle className='text-3xl' />
+            </button>
+          </div>
+        </div>
+        <div className="col2 w-[85%] Dheight bg-white py-4 flex flex-col">
+          <div className="border-b border-gray-400 px-2">
+            <h1 className="text-2xl font-semibold px-4">Chats...</h1>
+            {room && <p className="text-xs sm:px-4 sm:text-sm">room: {room._id}</p>}
 
-              <form onSubmit={handleSearchUser} className="border border-black flex my-4 overflow-hidden rounded-full bg-blue-50">
-                <input type="text" onChange={(e) => setSearchText(e.target.value)} value={searchText} placeholder='Search username or email' className="px-4 py-2 w-[85%] outline-none bg-transparent placeholder:truncate" />
-                <button className='py-2 px-2 text-2xl w-[15%] flex justify-center 2xl:px-4'><IoIosSearch /></button>
-              </form>
-            </div>
-            <div className='overflow-y-auto scrollbar-custom'>
-              {allUsers && (
-                allUsers.map((user, index) => (
-                  (user._id !== currentUser._id) && (
-                    <div key={index} style={{ background: `${user._id === reciverId ? 'rgb(245, 234, 255)' : ''}` }} onClick={() => handleSetReciverid(user._id)} className="flex items-center gap-6 py-2 border-b border-gray-500 transition-all duration-300 hover:bg-blue-50 cursor-pointer px-2">
-                      <div style={{ border: `${(online && online.some((obj) => Object.values(obj).includes(user._id))) ? '3px solid yellow' : ''}` }} className="w-auto h-auto relative bg-yellow-500 rounded-full">
-                        <img src={user.avatar} alt="" className="w-10 h-10 rounded-full bg-blue-200 border" />
-                        {(online && online.some((obj) => Object.values(obj).includes(user._id))) && (
-                          <div className="onlineFinder absolute w-4 h-4 bg-[#fdfd00] rounded-full bottom-0 right-0"></div>
-                        )}
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <h1 className="text-lg truncate">{user.username}</h1>
-                        <p className="text-xs text-gray-500 sm:font-semibold">{user.status}</p>
-                      </div>
+            <form onSubmit={handleSearchUser} className="border border-black flex my-4 overflow-hidden rounded-full bg-blue-50">
+              <input type="text" onChange={(e) => setSearchText(e.target.value)} value={searchText} placeholder='Search username or email' className="px-4 py-2 w-[85%] outline-none bg-transparent placeholder:truncate" />
+              <button className='py-2 px-2 text-2xl w-[15%] flex justify-center 2xl:px-4'><IoIosSearch /></button>
+            </form>
+          </div>
+          <div className='overflow-y-auto scrollbar-custom'>
+            {allUsers && (
+              allUsers.map((user, index) => (
+                (user._id !== currentUser._id) && (
+                  <div key={index} style={{ background: `${user._id === reciverId ? 'rgb(245, 234, 255)' : ''}` }} onClick={() => handleSetReciverid(user._id)} className="flex items-center gap-6 py-2 border-b border-gray-500 transition-all duration-300 hover:bg-blue-50 cursor-pointer px-2">
+                    <div style={{ border: `${(online && online.some((obj) => Object.values(obj).includes(user._id))) ? '3px solid yellow' : ''}` }} className="w-auto h-auto relative bg-yellow-500 rounded-full">
+                      <img src={user.avatar} alt="" className="w-10 h-10 rounded-full bg-blue-200 border" />
+                      {(online && online.some((obj) => Object.values(obj).includes(user._id))) && (
+                        <div className="onlineFinder absolute w-4 h-4 bg-[#fdfd00] rounded-full bottom-0 right-0"></div>
+                      )}
                     </div>
-                  )
+                    <div className="flex flex-col gap-1">
+                      <h1 className="text-lg truncate">{user.username}</h1>
+                      <p className="text-xs text-gray-500 sm:font-semibold">{user.status}</p>
+                    </div>
+                  </div>
                 )
-                )
-              )}
-            </div>
+              )
+              )
+            )}
           </div>
         </div>
       </div>
-      <div className={`sideright w-full h-[100svh] border-l-4 border-gray-300 relative ${sideOpen ? 'opacity-60 bg-gray-200' : ''} lg:w-[70%]`}>
+      <div className={`sideright w-full Dheight border-l-4 border-gray-300 relative ${sideOpen ? 'opacity-60 bg-gray-200' : ''} lg:w-[70%]`}>
         {!reciverData && (
-          <div className="w-full h-[100svh] flex justify-center items-center gap-4">
+          <div className="w-full Dheight flex justify-center items-center gap-4">
             <h1 className="text-4xl text-gray-500 sm:text-[3rem[">ChatPlus...</h1>
             <img src={PlaneLogo} alt="" className="w-32 h-32 opacity-50 sm:w-48 sm:h-48" />
           </div>
