@@ -91,7 +91,7 @@ export default function Message({ text, sender, createTime, file, url, imgId, ha
                         </div>
                     </div>
                 )}
-                <p className="break-all text-sm whitespace-normal">{text}</p>
+                <p className="text-sm whitespace-normal break-words">{text}</p>
                 <div className="min-w-16 h-4">
                     <h2 className="text-[0.65rem] float-end min-w-[10%] font-semibold text-gray-700">{showTime(createTime)}</h2>
                 </div>
